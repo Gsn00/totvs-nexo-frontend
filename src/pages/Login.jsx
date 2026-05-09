@@ -1,9 +1,31 @@
+import { Eye, EyeOff } from "lucide-react";
 import AnimatedPolygons from "../components/animated-polygons";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Spinner } from "@/components/ui/spinner";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    navigate("/dashboard");
+  };
+
   return (
     <section className="flex w-full h-full">
-      <div className="relative hidden w-1/2 flex-col justify-between bg-[#0a0f1a] lg:flex overflow-hidden p-12">
+      <div className="relative hidden w-4/7 flex-col justify-between bg-[#0a0f1a] lg:flex overflow-hidden p-12">
         <div className="absolute inset-0">
           <AnimatedPolygons />
         </div>
@@ -73,9 +95,144 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center bg-white p-12 lg:w-1/2">
-        <h1 className="text-3xl font-bold mb-6">Bem-vindo de volta!</h1>
-        <p className="text-gray-600 mb-8">Faça login para acessar sua conta</p>
+      <div className="relative flex w-full flex-col justify-center px-8 lg:w-3/7 lg:px-16 bg-background">
+        {/* Content */}
+        <div className="relative z-10">
+          {/* Mobile Logo - Animated */}
+          <div className="mb-8 flex items-center gap-2 lg:hidden animate-in fade-in slide-in-from-top-4 duration-500">
+            <img
+              className="w-10 h-10 rounded-xl shadow-lg shadow-primary/30"
+              src="totvs.png"
+              alt="Logo TOTVS"
+            />
+            <h1 className="font-bold text-xl font-display tracking-tight text-white">
+              TOTVS
+            </h1>
+            <h1 className="text-xl font-display tracking-tight text-primary">
+              NEXO
+            </h1>
+          </div>
+
+          <div className="mx-auto w-full max-w-md">
+            {/* Glass Card - Animated */}
+            <div
+              className="rounded-2xl border border-border/50 bg-card p-8 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+              style={{ animationFillMode: "backwards" }}
+            >
+              <div className="mb-8">
+                <h2
+                  className="font-display text-2xl font-bold tracking-tight text-foreground animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300"
+                  style={{ animationFillMode: "backwards" }}
+                >
+                  Bem-vindo de volta
+                </h2>
+                <p
+                  className="mt-2 text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500 delay-400"
+                  style={{ animationFillMode: "backwards" }}
+                >
+                  Entre na sua conta para continuar
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div
+                  className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-500"
+                  style={{ animationFillMode: "backwards" }}
+                >
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="nome@empresa.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-12"
+                  />
+                </div>
+
+                <div
+                  className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[550ms]"
+                  style={{ animationFillMode: "backwards" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Senha</Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm font-medium text-primary hover:text-primary/90 transition-colors"
+                    >
+                      Esqueceu a senha?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Digite sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[600ms]"
+                  style={{ animationFillMode: "backwards" }}
+                >
+                  <Checkbox id="remember" />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Lembrar por 30 dias
+                  </label>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="h-12 w-full text-base font-medium shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[650ms]"
+                  style={{ animationFillMode: "backwards" }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner className="mr-2 h-5 w-5" />
+                      Entrando...
+                    </>
+                  ) : (
+                    "Entrar"
+                  )}
+                </Button>
+              </form>
+
+              <p
+                className="mt-6 text-center text-sm text-muted-foreground animate-in fade-in duration-500 delay-700"
+                style={{ animationFillMode: "backwards" }}
+              >
+                {"Não tem uma conta? "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-primary hover:text-primary/90 transition-colors"
+                >
+                  Contate seu administrador
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
