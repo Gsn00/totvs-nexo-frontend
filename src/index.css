@@ -1,0 +1,199 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+:root {
+  /* =========================
+     CORE COLORS
+  ========================= */
+
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.145 0 0);
+
+  --primary: oklch(0.82 0.15 195);
+  --primary-foreground: oklch(0.15 0.02 220);
+
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+
+  --border: oklch(0.91 0 0);
+
+  /* =========================
+     COMPONENTS
+  ========================= */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+
+  /* =========================
+     STATUS COLORS
+  ========================= */
+
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(0.98 0 0);
+
+  --warning: oklch(0.8 0.15 85);
+  --warning-foreground: oklch(0.2 0 0);
+
+  --error: oklch(0.577 0.2 27);
+  --error-foreground: oklch(0.98 0 0);
+
+  /* =========================
+     CHARTS
+  ========================= */
+
+  --chart-primary: oklch(0.82 0.15 195);
+  --chart-secondary: oklch(0.65 0.2 145);
+  --chart-warning: oklch(0.7 0.15 50);
+  --chart-danger: oklch(0.55 0.2 27);
+
+  /* =========================
+     RADIUS
+  ========================= */
+
+  --radius: 0.75rem;
+}
+
+.dark {
+  /* =========================
+     CORE COLORS
+  ========================= */
+
+  --background: oklch(0.16 0.02 255);
+  --foreground: oklch(0.95 0 0);
+
+  --primary: oklch(0.82 0.15 195);
+  --primary-foreground: oklch(0.15 0.02 220);
+
+  --secondary: oklch(0.25 0.02 255);
+  --secondary-foreground: oklch(0.95 0 0);
+
+  --muted: oklch(0.25 0.02 255);
+  --muted-foreground: oklch(0.65 0 0);
+
+  --border: oklch(0.28 0.02 255);
+
+  /* =========================
+     COMPONENTS
+  ========================= */
+
+  --card: oklch(0.19 0.02 255);
+  --card-foreground: oklch(0.95 0 0);
+
+  --sidebar: oklch(0.14 0.02 255);
+  --sidebar-foreground: oklch(0.95 0 0);
+
+  /* =========================
+     STATUS COLORS
+  ========================= */
+
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(0.98 0 0);
+
+  --warning: oklch(0.8 0.15 85);
+  --warning-foreground: oklch(0.2 0 0);
+
+  --error: oklch(0.55 0.2 27);
+  --error-foreground: oklch(0.98 0 0);
+
+  /* =========================
+     CHARTS
+  ========================= */
+
+  --chart-primary: oklch(0.82 0.15 195);
+  --chart-secondary: oklch(0.65 0.2 145);
+  --chart-warning: oklch(0.75 0.15 50);
+  --chart-danger: oklch(0.6 0.2 27);
+}
+
+@theme inline {
+  /* =========================
+     FONTS
+  ========================= */
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* =========================
+     COLORS
+  ========================= */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--border);
+
+  /* =========================
+     COMPONENT COLORS
+  ========================= */
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  /* =========================
+     STATUS COLORS
+  ========================= */
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+
+  /* =========================
+     CHART COLORS
+  ========================= */
+
+  --color-chart-primary: var(--chart-primary);
+  --color-chart-secondary: var(--chart-secondary);
+  --color-chart-warning: var(--chart-warning);
+  --color-chart-danger: var(--chart-danger);
+
+  /* =========================
+     RADIUS
+  ========================= */
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
