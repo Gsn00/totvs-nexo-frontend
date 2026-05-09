@@ -41,7 +41,7 @@ export default function Login() {
           <h1 className="font-bold text-2xl font-display tracking-tight text-white">
             TOTVS
           </h1>
-          <h1 className="text-2xl font-display tracking-tight text-primary">
+          <h1 className="font-light text-2xl font-display tracking-tight text-primary">
             NEXO
           </h1>
         </div>
@@ -108,7 +108,7 @@ export default function Login() {
             <h1 className="font-bold text-xl font-display tracking-tight text-white">
               TOTVS
             </h1>
-            <h1 className="text-xl font-display tracking-tight text-primary">
+            <h1 className="font-light text-xl font-display tracking-tight text-primary">
               NEXO
             </h1>
           </div>
@@ -158,7 +158,7 @@ export default function Login() {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Senha</Label>
                     <Link
-                      href="/forgot-password"
+                      to="/forgot-password"
                       className="text-sm font-medium text-primary hover:text-primary/90 transition-colors"
                     >
                       Esqueceu a senha?
@@ -224,7 +224,7 @@ export default function Login() {
               >
                 {"Não tem uma conta? "}
                 <Link
-                  href="/signup"
+                  to="/signup"
                   className="font-medium text-primary hover:text-primary/90 transition-colors"
                 >
                   Contate seu administrador
