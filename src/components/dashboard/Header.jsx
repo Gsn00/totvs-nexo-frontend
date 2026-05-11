@@ -43,7 +43,9 @@ export default function Header({ title, subtitle }) {
         <div>
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <p className="hidden xl:block text-sm text-muted-foreground">
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
