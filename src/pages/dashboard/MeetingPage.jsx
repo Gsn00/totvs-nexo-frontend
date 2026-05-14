@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -7,9 +8,10 @@ import {
   TrendingUp,
   MessageSquare,
   Sparkles,
-  Building2,
-  UserCircle,
-  Package,
+  Filter,
+  Activity,
+  Box,
+  XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,104 +25,119 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../components/dashboard/Header";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import { SentimentTimeline } from "../../components/dashboard/SentimentTimeline";
 
-// Mock meeting data
+// Mock meeting data atualizado com o padrão real e novas entidades
 const meetingData = {
-  id: "1",
-  client: "Acme Corporation",
-  title: "Revisão de Negócios Q4",
-  date: "2024-01-15",
-  time: "14:30",
-  duration: "45 min",
-  participants: [
-    "João Silva (CEO)",
-    "Maria Santos (CTO)",
-    "Pedro Lima (Gerente de Conta)",
-    "Ana Costa (CSM)",
-  ],
-  healthScore: 85,
-  sentiment: "positivo",
+  id: "1247082",
+  client: "Saúde & Vida Corp",
+  title: "Apresentação de Soluções de Ponto",
+  date: "2026-03-18",
+  time: "16:00",
+  duration: "01:39:13",
+  participants: ["LOCUTOR 102", "LOCUTOR 49", "LOCUTOR 73", "LOCUTOR 3"],
+  healthScore: 65,
+  sentiment: "misto",
   transcript: [
     {
-      speaker: "Pedro Lima",
-      role: "Gerente de Conta",
-      text: "Obrigado a todos por participarem da revisão do Q4. Estou animado para compartilhar os resultados e discutir nosso roadmap para o próximo ano.",
-      timestamp: "00:00:15",
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
       entities: [],
     },
     {
-      speaker: "João Silva",
-      role: "CEO - Acme Corp",
-      text: "Obrigado Pedro. Estamos muito satisfeitos com a plataforma TOTVS neste trimestre. A integração com nosso ERP foi perfeita.",
-      timestamp: "00:00:45",
-      entities: [{ type: "product", text: "plataforma TOTVS" }],
-    },
-    {
-      speaker: "Maria Santos",
-      role: "CTO - Acme Corp",
-      text: "Tenho que dizer que estávamos inicialmente considerando a SAP para nossas necessidades empresariais, mas o modelo de preços de vocês foi muito mais competitivo.",
-      timestamp: "00:01:15",
-      entities: [{ type: "competitor", text: "SAP" }],
-    },
-    {
-      speaker: "Ana Costa",
-      role: "CSM",
-      text: "Que ótimo ouvir isso! Estamos trabalhando em vários recursos novos que acredito serão valiosos para sua equipe técnica.",
-      timestamp: "00:01:45",
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
       entities: [],
     },
     {
-      speaker: "João Silva",
-      role: "CEO - Acme Corp",
-      text: "Uma preocupação que temos é o módulo de relatórios. Está um pouco mais lento do que nossa experiência anterior com a solução da Senior.",
-      timestamp: "00:02:15",
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
+      entities: [],
+    },
+    {
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
+      entities: [],
+    },
+    {
+      speaker: "LOCUTOR 3",
+      text: "Conheço a TOTVS, sou apaixonado pela RM, não troco de sistema de jeito nenhum. Mas nosso portal interno está com problemas.",
+      timestamp: "00:10:15",
       entities: [
-        { type: "product", text: "módulo de relatórios" },
-        { type: "competitor", text: "Senior" },
+        { type: "product", text: "RM" },
+        { type: "painPoint", text: "portal interno está com problemas" },
       ],
     },
     {
-      speaker: "Pedro Lima",
-      role: "Gerente de Conta",
-      text: "Entendo. Temos uma atualização de otimização de performance chegando no Q1 que deve resolver essas preocupações diretamente.",
-      timestamp: "00:02:45",
+      speaker: "LOCUTOR 102",
+      text: "Entendo. Vocês já usam nossa folha, o que vocês querem é o Meu RH para funcionar melhor.",
+      timestamp: "00:12:45",
+      entities: [{ type: "product", text: "Meu RH" }],
+    },
+    {
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
       entities: [],
     },
     {
-      speaker: "Maria Santos",
-      role: "CTO - Acme Corp",
-      text: "Isso seria excelente. Além disso, estamos planejando expandir para mais dois departamentos - Financeiro e RH.",
-      timestamp: "00:03:15",
+      speaker: "LOCUTOR 102",
+      text: "[PESSOA], boa tarde. Tudo bem?",
+      timestamp: "00:00:01",
+      entities: [],
+    },
+    {
+      speaker: "LOCUTOR 3",
+      text: "Exatamente. Estávamos vendo a Senior, mas a integração de vocês com a folha RM pesa muito.",
+      timestamp: "00:15:30",
       entities: [
-        { type: "role", text: "Financeiro" },
-        { type: "role", text: "RH" },
+        { type: "competitor", text: "Senior" },
+        { type: "product", text: "folha RM" },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 49",
+      text: "Uma preocupação do nosso Diretor Financeiro é o custo de implementação.",
+      timestamp: "00:20:00",
+      entities: [
+        { type: "role", text: "Diretor Financeiro" },
+        { type: "painPoint", text: "custo de implementação" },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 3",
+      text: "Se não resolvermos isso logo, vamos ter que avaliar outras opções no mercado no próximo trimestre.",
+      timestamp: "00:25:45",
+      entities: [
+        { type: "churnRisk", text: "avaliar outras opções no mercado" },
       ],
     },
   ],
   insights: {
     painPoints: [
-      "Performance do módulo de relatórios está mais lenta do que esperado",
-      "Curva de aprendizado para novos membros da equipe",
-      "Documentação de integração poderia ser mais detalhada",
+      "Portal de ponto interno desenvolvido internamente com bugs",
+      "Necessidade de gestão mais simples para coordenadores de saúde",
+      "Preocupação com custo de implementação",
     ],
     positiveHighlights: [
-      "Satisfação geral com a plataforma",
-      "Integração com ERP funcionando perfeitamente",
-      "Modelo de preços apreciado",
-      "Planejando expandir para mais departamentos",
+      "Cliente é 'apaixonado' pela linha RM",
+      "Já utiliza a Folha de Pagamento da TOTVS",
+      "Aberto a conhecer o Meu RH e Clockin",
     ],
     riskPoints: [
-      "Concorrente (SAP) foi considerado anteriormente",
-      "Experiência anterior com solução da Senior mencionada",
-      "Preocupações de performance com módulo de relatórios",
+      "Menção direta ao concorrente Senior",
+      "Ameaça de buscar outras opções se o problema não for resolvido logo",
+      "Complexidade da operação 24h em ambiente de saúde",
     ],
     aiSuggestions: [
-      "Acompanhar com cronograma de atualização de performance do Q1",
-      "Agendar demonstração técnica para departamentos de Financeiro e RH",
-      "Fornecer documentação aprimorada para integração",
-      "Considerar oferecer pacote de suporte premium",
+      "Focar a proposta no valor da integração nativa com a Folha RM",
+      "Agendar demo do Clockin focada em biometria facial para ambiente hospitalar",
+      "Apresentar case de sucesso no segmento de Saúde",
     ],
   },
 };
@@ -131,17 +148,23 @@ const entityStyles = {
   product:
     "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700",
   role: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700",
+  painPoint:
+    "bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700",
+  churnRisk:
+    "bg-rose-900/30 text-rose-800 dark:text-rose-200 border-rose-400 dark:border-rose-800",
 };
 
 const entityIcons = {
-  competitor: Building2,
-  product: Package,
-  role: UserCircle,
+  competitor: <AlertTriangle className="h-3 w-3" />,
+  product: <Box className="h-3 w-3" />,
+  role: <Users className="h-3 w-3" />,
+  painPoint: <XCircle className="h-3 w-3" />,
+  churnRisk: <Activity className="h-3 w-3" />,
 };
 
 export default function MeetingDetailsPage() {
-  const { id } = useParams();
   const meeting = meetingData;
+  const [showOnlyHighlights, setShowOnlyHighlights] = useState(false);
 
   const healthScoreColor = (score) => {
     if (score >= 70) return "bg-green-500";
@@ -149,12 +172,49 @@ export default function MeetingDetailsPage() {
     return "bg-red-500";
   };
 
+  const filteredTranscript = showOnlyHighlights
+    ? meeting.transcript.filter((entry) => entry.entities.length > 0)
+    : meeting.transcript;
+
+  // Função para renderizar o texto com as entidades destacadas
+  const renderHighlightedText = (text, entities) => {
+    if (!entities || entities.length === 0) return text;
+
+    let parts = [text];
+    entities.forEach((entity) => {
+      const newParts = [];
+      parts.forEach((part) => {
+        if (typeof part !== "string") {
+          newParts.push(part);
+          return;
+        }
+        const splitText = part.split(entity.text);
+        splitText.forEach((t, i) => {
+          newParts.push(t);
+          if (i < splitText.length - 1) {
+            newParts.push(
+              <span
+                key={`${entity.text}-${i}`}
+                className={`px-1 rounded border ${entityStyles[entity.type]} font-medium mx-0.5 flex items-center gap-1 text-xs`}
+              >
+                {entityIcons[entity.type]}
+                {entity.text}
+              </span>,
+            );
+          }
+        });
+      });
+      parts = newParts;
+    });
+    return parts;
+  };
+
   return (
     <div className="flex flex-col">
       <Header title={meeting.title} subtitle={meeting.client} />
 
       <div className="flex-1 space-y-6 p-4 lg:p-6">
-        {/* Back button and metadata */}
+        {/* Navegação e Metadados */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Button variant="ghost" asChild className="w-fit">
             <Link to="/meetings">
@@ -184,7 +244,7 @@ export default function MeetingDetailsPage() {
           </div>
         </div>
 
-        {/* Health Score Card */}
+        {/* Card de Score de Saúde */}
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -214,7 +274,7 @@ export default function MeetingDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Main Content */}
+        {/* Conteúdo Principal */}
         <Tabs defaultValue="transcript" className="flex flex-col space-y-6">
           <TabsList>
             <TabsTrigger value="transcript" className="gap-2">
@@ -231,60 +291,71 @@ export default function MeetingDetailsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Transcript Tab */}
+          {/* Aba de Transcrição */}
           <TabsContent value="transcript" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Transcrição da Reunião</CardTitle>
-                <CardDescription>
-                  Entidades destacadas:
-                  <span className="ml-2 inline-flex gap-2">
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between space-y-0">
+                <div>
+                  <CardTitle>Transcrição da Reunião</CardTitle>
+                  <CardDescription className="mt-2 flex flex-wrap gap-2">
+                    <Badge className={entityStyles.product}>Produtos</Badge>
                     <Badge className={entityStyles.competitor}>
                       Concorrentes
                     </Badge>
-                    <Badge className={entityStyles.product}>Produtos</Badge>
-                    <Badge className={entityStyles.role}>
-                      Cargos/Departamentos
+                    <Badge className={entityStyles.role}>Cargos</Badge>
+                    <Badge className={entityStyles.painPoint}>Dores</Badge>
+                    <Badge className={entityStyles.churnRisk}>
+                      Risco de Churn
                     </Badge>
-                  </span>
-                </CardDescription>
+                  </CardDescription>
+                </div>
+                <Button
+                  variant={showOnlyHighlights ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowOnlyHighlights(!showOnlyHighlights)}
+                  className="gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  {showOnlyHighlights
+                    ? "Mostrando Destaques"
+                    : "Mostrar apenas destaques"}
+                </Button>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {meeting.transcript.map((entry, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                      {entry.speaker
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{entry.speaker}</p>
-                        <span className="text-xs text-muted-foreground">
-                          {entry.role}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {entry.timestamp}
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground">
-                        {entry.entities.length > 0 && entry.text}
+              <CardContent className="space-y-6 max-h-150 overflow-y-auto pr-4">
+                {filteredTranscript.map((entry, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col space-y-1 border-l-2 border-muted pl-4 hover:border-primary transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-primary">
+                        {entry.speaker}
                       </p>
+                      <span className="text-xs text-muted-foreground">
+                        {entry.timestamp}
+                      </span>
                     </div>
+                    <p className="text-sm leading-relaxed text-foreground/90 flex flex-wrap">
+                      {renderHighlightedText(entry.text, entry.entities)}
+                    </p>
                   </div>
                 ))}
+                {filteredTranscript.length === 0 && (
+                  <div className="py-10 text-center text-muted-foreground">
+                    Nenhum destaque encontrado nesta reunião.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Insights Tab */}
+          {/* Aba de Insights */}
           <TabsContent value="insights" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Pain Points */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
                     <AlertTriangle className="h-5 w-5" />
                     Pontos de Dor do Cliente
                   </CardTitle>
@@ -293,7 +364,7 @@ export default function MeetingDetailsPage() {
                   <ul className="space-y-3">
                     {meeting.insights.painPoints.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                         <span className="text-muted-foreground">{point}</span>
                       </li>
                     ))}
@@ -301,7 +372,7 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Positive Highlights */}
+              {/* Destaques Positivos */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -321,19 +392,19 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Risk Points */}
+              {/* Pontos de Risco */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-                    <AlertTriangle className="h-5 w-5" />
-                    Pontos de Risco
+                  <CardTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                    <Activity className="h-5 w-5" />
+                    Pontos de Risco e Churn
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
                     {meeting.insights.riskPoints.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-500" />
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
                         <span className="text-muted-foreground">{point}</span>
                       </li>
                     ))}
@@ -341,12 +412,12 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* AI Suggestions */}
+              {/* Sugestões da IA */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
                     <Sparkles className="h-5 w-5" />
-                    Sugestões da IA
+                    Sugestões de Próximas Ações
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -365,7 +436,7 @@ export default function MeetingDetailsPage() {
             </div>
           </TabsContent>
 
-          {/* Sentiment Timeline Tab */}
+          {/* Aba de Sentimento */}
           <TabsContent value="timeline">
             <SentimentTimeline />
           </TabsContent>

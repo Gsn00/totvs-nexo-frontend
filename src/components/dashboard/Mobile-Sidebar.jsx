@@ -26,7 +26,7 @@ export default function MobileSidebar() {
           src="totvs.png"
           alt="Logo TOTVS"
         />
-        <h1 className="font-bold text-xl font-display tracking-tight text-white">
+        <h1 className="font-bold text-xl font-display tracking-tight text-foreground">
           TOTVS
         </h1>
         <h1 className="font-light text-xl font-display tracking-tight text-primary">
