@@ -35,7 +35,7 @@ export default function Login() {
         <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
           <img
             className="w-12 h-12 rounded-xl shadow-lg shadow-primary/30"
-            src="totvs.png"
+            src="/totvs.png"
             alt="Logo TOTVS"
           />
           <h1 className="font-bold text-2xl font-display tracking-tight text-white">
@@ -102,7 +102,7 @@ export default function Login() {
           <div className="mb-8 flex items-center gap-2 lg:hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <img
               className="w-10 h-10 rounded-xl shadow-lg shadow-primary/30"
-              src="totvs.png"
+              src="/totvs.png"
               alt="Logo TOTVS"
             />
             <h1 className="font-bold text-xl font-display tracking-tight text-white">

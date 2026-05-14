@@ -23,7 +23,7 @@ export default function MobileSidebar() {
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-4">
         <img
           className="w-10 h-10 rounded-xl shadow-lg shadow-primary/30"
-          src="totvs.png"
+          src="/totvs.png"
           alt="Logo TOTVS"
         />
         <h1 className="font-bold text-xl font-display tracking-tight text-foreground">
