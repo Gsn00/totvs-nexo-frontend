@@ -5,7 +5,7 @@ import { RecentMeetings } from "../../components/dashboard/RecentMeetings";
 import { SentimentChart } from "../../components/dashboard/SentimentChart";
 import { TalkListenChart } from "../../components/dashboard/TalkListenChart";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="flex flex-col">
       <Header
