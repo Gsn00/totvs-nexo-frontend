@@ -99,7 +99,7 @@ export default function Login() {
         {/* Content */}
         <div className="relative z-10">
           {/* Mobile Logo - Animated */}
-          <div className="mb-8 flex items-center gap-2 lg:hidden animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="mb-8 flex items-center gap-1.5 lg:hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <img
               className="w-10 h-10 rounded-xl shadow-lg shadow-primary/30"
               src="/totvs.png"

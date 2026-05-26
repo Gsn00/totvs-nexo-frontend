@@ -31,10 +31,10 @@ export default function Sidebar() {
   return (
     <aside className="sticky left-0 top-0 z-40 flex h-screen w-16 flex-col border-r border-sidebar-border bg-sidebar lg:w-64">
       {/* Logo */}
-      <div className="flex h-18 items-center gap-2 border-b border-sidebar-border max-lg:justify-center lg:px-4">
+      <div className="flex h-18 items-center gap-1.5 border-b border-sidebar-border max-lg:justify-center lg:px-4">
         <img
           className="w-10 h-10 rounded-xl shadow-lg shadow-primary/30"
-          src="/totvs.png"
+          src="totvs.png"
           alt="Logo TOTVS"
         />
         <h1 className="font-bold text-xl font-display text-foreground hidden lg:block">
