@@ -14,9 +14,9 @@ const alerts = [
   {
     id: 1,
     competitor: "Senior",
-    client: "Acme Corp",
-    meeting: "Revisao Q4",
-    context: "Cliente mencionou modelo de precos da Senior",
+    client: "Saúde & Vida Corp",
+    meeting: "Apresentação de Soluções de Ponto",
+    context: "Menção direta ao concorrente Senior",
     severity: "high",
     time: "2 horas atras",
   },

@@ -36,7 +36,13 @@ const meetingData = {
   date: "2026-03-18",
   time: "16:00",
   duration: "01:39:13",
-  participants: ["LOCUTOR 102 (Vendedor)", "LOCUTOR 49 (Vendedor)", "LOCUTOR 3 (Gerente Cliente)", "LOCUTOR 72 (Cliente)", "LOCUTOR 63 (Cliente)"],
+  participants: [
+    "LOCUTOR 102 (Vendedor)",
+    "LOCUTOR 49 (Vendedor)",
+    "LOCUTOR 3 (Gerente Cliente)",
+    "LOCUTOR 72 (Cliente)",
+    "LOCUTOR 63 (Cliente)",
+  ],
   healthScore: 65,
   sentiment: "neutro",
   transcript: [
