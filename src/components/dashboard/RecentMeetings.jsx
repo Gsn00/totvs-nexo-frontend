@@ -14,12 +14,12 @@ import { Link } from "react-router";
 const meetings = [
   {
     id: "1",
-    client: "Acme Corporation",
-    title: "Revisao de Negocios Q4",
-    date: "Hoje, 14:30",
-    healthScore: 85,
-    sentiment: "positivo",
-    duration: "45 min",
+    client: "Saúde & Vida Corp",
+    title: "Apresentação de Soluções de Ponto",
+    date: "Hoje, 16:00",
+    healthScore: 65,
+    sentiment: "neutro",
+    duration: "1h 39min",
   },
   {
     id: "2",

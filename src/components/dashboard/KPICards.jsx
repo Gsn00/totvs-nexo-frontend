@@ -26,19 +26,11 @@ const kpis = [
     description: "identificadas este mes",
     icon: TrendingUp,
   },
-  {
-    title: "Clientes Ativos",
-    value: "156",
-    change: "+5",
-    changeType: "positive",
-    description: "vs mes anterior",
-    icon: Users,
-  },
 ];
 
 export function KPICards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
       {kpis.map((kpi) => (
         <Card key={kpi.title} className="overflow-hidden">
           <CardContent className="p-6">

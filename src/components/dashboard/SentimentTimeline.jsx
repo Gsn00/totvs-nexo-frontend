@@ -17,16 +17,16 @@ import {
 } from "@/components/ui/card";
 
 const sentimentData = [
-  { time: "00:00", sentiment: 65, label: "Abertura" },
-  { time: "05:00", sentiment: 72, label: "Discussão do produto" },
-  { time: "10:00", sentiment: 78, label: "Feedback de integração" },
-  { time: "15:00", sentiment: 55, label: "Menção a concorrente" },
-  { time: "20:00", sentiment: 62, label: "Preocupações de performance" },
-  { time: "25:00", sentiment: 70, label: "Discussão do roadmap" },
-  { time: "30:00", sentiment: 82, label: "Planos de expansão" },
-  { time: "35:00", sentiment: 85, label: "Preview de recursos" },
-  { time: "40:00", sentiment: 88, label: "Próximos passos acordados" },
-  { time: "45:00", sentiment: 90, label: "Fechamento positivo" },
+  { time: "00:00", sentiment: 65, label: "Início da Reunião" },
+  { time: "10:15", sentiment: 78, label: "Paixão pela linha RM e TOTVS" },
+  { time: "12:45", sentiment: 72, label: "Interesse no Meu RH" },
+  { time: "15:30", sentiment: 45, label: "Risco: Avaliação da Senior" },
+  { time: "20:00", sentiment: 55, label: "Preocupação: Custo de Implementação" },
+  { time: "25:45", sentiment: 40, label: "Alerta: Risco de buscar outras opções" },
+  { time: "40:00", sentiment: 60, label: "Discussão de integração nativa" },
+  { time: "60:00", sentiment: 68, label: "Abertura para demo do Clockin" },
+  { time: "80:00", sentiment: 75, label: "Alinhamento de próximos passos" },
+  { time: "99:13", sentiment: 75, label: "Fechamento da Reunião" },
 ];
 
 export function SentimentTimeline() {
@@ -35,11 +35,11 @@ export function SentimentTimeline() {
       <CardHeader>
         <CardTitle>Linha do Tempo de Sentimento</CardTitle>
         <CardDescription>
-          Acompanhe como o sentimento do cliente evoluiu durante a reunião
+          Acompanhe a evolução do sentimento baseada nos marcos da reunião com a Saúde & Vida Corp.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-100">
+        <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={sentimentData}>
               <defs>
@@ -100,11 +100,11 @@ export function SentimentTimeline() {
                 ]}
               />
               <ReferenceLine
-                y={50}
+                y={65}
                 stroke="var(--muted-foreground)"
                 strokeDasharray="5 5"
                 label={{
-                  value: "Neutro",
+                  value: "Média (65%)",
                   position: "right",
                   fill: "var(--muted-foreground)",
                   fontSize: 10,
@@ -132,27 +132,27 @@ export function SentimentTimeline() {
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              90%
+              78%
             </p>
             <p className="text-sm text-muted-foreground">Pico de Sentimento</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              às 45:00 - Fechamento positivo
+              às 10:15 - Paixão pela linha RM
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              55%
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              40%
             </p>
             <p className="text-sm text-muted-foreground">Ponto Mais Baixo</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              às 15:00 - Menção a concorrente
+              às 25:45 - Risco de buscar outras opções
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-2xl font-bold text-primary">+25%</p>
+            <p className="text-2xl font-bold text-primary">+10%</p>
             <p className="text-sm text-muted-foreground">Variação Líquida</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Tendência geral positiva
+              Recuperação com foco em integração
             </p>
           </div>
         </div>

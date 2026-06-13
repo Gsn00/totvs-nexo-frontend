@@ -36,31 +36,13 @@ const meetingData = {
   date: "2026-03-18",
   time: "16:00",
   duration: "01:39:13",
-  participants: ["LOCUTOR 102", "LOCUTOR 49", "LOCUTOR 73", "LOCUTOR 3"],
+  participants: ["LOCUTOR 102 (Vendedor)", "LOCUTOR 49 (Vendedor)", "LOCUTOR 3 (Gerente Cliente)", "LOCUTOR 72 (Cliente)", "LOCUTOR 63 (Cliente)"],
   healthScore: 65,
-  sentiment: "misto",
+  sentiment: "neutro",
   transcript: [
     {
       speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
-    },
-    {
-      speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
-    },
-    {
-      speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
-    },
-    {
-      speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
+      text: "Boa tarde. Tudo bem?",
       timestamp: "00:00:01",
       entities: [],
     },
@@ -78,18 +60,6 @@ const meetingData = {
       text: "Entendo. Vocês já usam nossa folha, o que vocês querem é o Meu RH para funcionar melhor.",
       timestamp: "00:12:45",
       entities: [{ type: "product", text: "Meu RH" }],
-    },
-    {
-      speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
-    },
-    {
-      speaker: "LOCUTOR 102",
-      text: "[PESSOA], boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
     },
     {
       speaker: "LOCUTOR 3",
