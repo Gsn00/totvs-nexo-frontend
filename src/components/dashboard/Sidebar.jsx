@@ -14,7 +14,7 @@ import {
   Calendar,
   PlusCircle,
 } from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -27,6 +27,7 @@ const navigation = [
 export default function Sidebar() {
   const { theme, setTheme } = useTheme();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   return (
     <aside className="sticky left-0 top-0 z-40 flex h-screen w-16 flex-col border-r border-sidebar-border bg-sidebar lg:w-64">
@@ -114,13 +115,16 @@ export default function Sidebar() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link
-                to="/"
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  navigate("/login");
+                }}
+                className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-5 w-5 shrink-0" />
                 <span className="hidden lg:block">Sair</span>
-              </Link>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="right" className="lg:hidden">
               Sair
