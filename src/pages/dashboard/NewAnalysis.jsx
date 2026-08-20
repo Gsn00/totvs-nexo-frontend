@@ -15,6 +15,15 @@ import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import Header from "../../components/dashboard/Header";
 import { useNavigate } from "react-router";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const analysisSteps = [
   {
@@ -43,6 +52,7 @@ export default function NewAnalysis() {
   const [transcript, setTranscript] = useState("");
   const [clientName, setClientName] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
+  const [meetingDate, setMeetingDate] = useState("");
   const [analysisState, setAnalysisState] = useState("idle");
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -119,6 +129,37 @@ export default function NewAnalysis() {
                         onChange={(e) => setMeetingTitle(e.target.value)}
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data da Reunião</Label>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+
+                          {meetingDate ? (
+                            format(meetingDate, "dd/MM/yyyy", { locale: ptBR })
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Selecione uma data
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={meetingDate}
+                          onSelect={setMeetingDate}
+                          locale={ptBR}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </CardContent>
               </Card>
