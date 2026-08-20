@@ -28,14 +28,11 @@ import Header from "../../components/dashboard/Header";
 import { Link } from "react-router";
 import { SentimentTimeline } from "../../components/dashboard/SentimentTimeline";
 
-// Mock meeting data atualizado com o padrão real e novas entidades
 const meetingData = {
   id: "1247082",
   client: "Saúde & Vida Corp",
   title: "Apresentação de Soluções de Ponto",
   date: "2026-03-18",
-  time: "16:00",
-  duration: "01:39:13",
   participants: [
     "LOCUTOR 102 (Vendedor)",
     "LOCUTOR 49 (Vendedor)",
@@ -47,50 +44,107 @@ const meetingData = {
   sentiment: "neutro",
   transcript: [
     {
-      speaker: "LOCUTOR 102",
-      text: "Boa tarde. Tudo bem?",
-      timestamp: "00:00:01",
-      entities: [],
-    },
-    {
-      speaker: "LOCUTOR 3",
-      text: "Conheço a TOTVS, sou apaixonado pela RM, não troco de sistema de jeito nenhum. Mas nosso portal interno está com problemas.",
-      timestamp: "00:10:15",
+      speaker: "LOCUTOR 107",
+      text: "Hoje eu sou um executivo da TOTVS que faz o atendimento que a gente chama de Corporate. Eu sou especialista no segmento de varejo e distribuição.",
       entities: [
-        { type: "product", text: "RM" },
-        { type: "painPoint", text: "portal interno está com problemas" },
+        {
+          type: "role",
+          text: "especialista",
+        },
       ],
     },
     {
-      speaker: "LOCUTOR 102",
-      text: "Entendo. Vocês já usam nossa folha, o que vocês querem é o Meu RH para funcionar melhor.",
-      timestamp: "00:12:45",
-      entities: [{ type: "product", text: "Meu RH" }],
-    },
-    {
-      speaker: "LOCUTOR 3",
-      text: "Exatamente. Estávamos vendo a Senior, mas a integração de vocês com a folha RM pesa muito.",
-      timestamp: "00:15:30",
+      speaker: "LOCUTOR 13",
+      text: "Sim, hoje a gente, a folha está toda, a gente tem um sistema da Domini, né?",
       entities: [
-        { type: "competitor", text: "Senior" },
-        { type: "product", text: "folha RM" },
+        {
+          type: "competitor",
+          text: "Domini",
+        },
       ],
     },
     {
-      speaker: "LOCUTOR 49",
-      text: "Uma preocupação do nosso Diretor Financeiro é o custo de implementação.",
-      timestamp: "00:20:00",
+      speaker: "LOCUTOR 113",
+      text: "O nosso sistema, aqui eu estava batendo ponto, o nosso sistema, a gente já está no mercado, a Totos adquiriu o sistema da Agora, há quase dois anos atrás, tá?",
       entities: [
-        { type: "role", text: "Diretor Financeiro" },
-        { type: "painPoint", text: "custo de implementação" },
+        {
+          type: "product",
+          text: "Agora",
+        },
       ],
     },
     {
-      speaker: "LOCUTOR 3",
-      text: "Se não resolvermos isso logo, vamos ter que avaliar outras opções no mercado no próximo trimestre.",
-      timestamp: "00:25:45",
+      speaker: "LOCUTOR 13",
+      text: "É o século. É o século.",
       entities: [
-        { type: "churnRisk", text: "avaliar outras opções no mercado" },
+        {
+          type: "competitor",
+          text: "século",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 21",
+      text: "O outro é o Contra-ID. Ele é... eu acho que deve ter uns 10, 12, eu acho.",
+      entities: [
+        {
+          type: "competitor",
+          text: "Contra-ID",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 21",
+      text: "A gente só consegue ver o ponto uma vez por mês Que é quando a gente começa o fechamento para a folha de pagamento E, muitas vezes, acontece uma situação lá no dia 20 do mês passado e a gente vai questionar o gerente, o gestor, e ele já não lembra mais o que aconteceu.",
+      entities: [
+        {
+          type: "painPoint",
+          text: "ver o ponto uma vez por mês",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 21",
+      text: "É, e uma coisa também sobre os atestados, hoje a gente tem que lançar em três lugares.",
+      entities: [
+        {
+          type: "painPoint",
+          text: "lançar em três lugares",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 21",
+      text: "Eu acho que o Regis trouxe ali no início da reunião que a gente precisa lançar tudo manual, né? O gestor faz a escala, é tudo em Excel. O gestor faz a escala no posto, vem para nós, a gente confere. A gente lança folga por folga, uma por uma dentro do ponto.",
+      entities: [
+        {
+          type: "painPoint",
+          text: "escala, é tudo em Excel",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 13",
+      text: "É a gestão das escalas e a visibilidade para o gestor fazer as suas manutenções com a gente.",
+      entities: [
+        {
+          type: "painPoint",
+          text: "gestão das escalas e a visibilidade para o gestor",
+        },
+      ],
+    },
+    {
+      speaker: "LOCUTOR 13",
+      text: "mas eu já, desde o ano passado, já venho pensando em trocar de fornecedor da Século porque ela hoje não nos atende.",
+      entities: [
+        {
+          type: "competitor",
+          text: "Século",
+        },
+        {
+          type: "painPoint",
+          text: "não nos atende",
+        },
       ],
     },
   ],
@@ -208,10 +262,6 @@ export default function MeetingDetailsPage() {
                 day: "numeric",
                 year: "numeric",
               })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {meeting.time} ({meeting.duration})
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
