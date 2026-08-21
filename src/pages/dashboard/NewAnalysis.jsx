@@ -15,8 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import Header from "../../components/dashboard/Header";
 import { useNavigate } from "react-router";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { CalendarIcon, XCircle } from "lucide-react";
+import { format, set } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { apiFetch } from "@/api/apiFetch";
 
 const analysisSteps = [
   {
@@ -43,8 +44,8 @@ const analysisSteps = [
   },
   {
     id: 4,
-    label: "Gerando insights",
-    description: "Criando recomendações acionáveis",
+    label: "Finalizando análise",
+    description: "Preparando o relatório final",
   },
 ];
 
@@ -53,37 +54,92 @@ export default function NewAnalysis() {
   const [clientName, setClientName] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
+  const [timeZone, setTimeZone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
   const [analysisState, setAnalysisState] = useState("idle");
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const navigate = useNavigate();
 
   const handleAnalyze = async () => {
-    if (!transcript.trim() || !clientName.trim() || !meetingTitle.trim())
+    if (
+      !transcript.trim() ||
+      !clientName.trim() ||
+      !meetingTitle.trim() ||
+      !meetingDate
+    )
       return;
 
     setAnalysisState("analyzing");
     setCurrentStep(0);
     setProgress(0);
 
+    const date = format(meetingDate, "yyyy-MM-dd", { locale: ptBR });
+
+    const body = new FormData();
+    body.append("client", clientName);
+    body.append("title", meetingTitle);
+    body.append("date", date);
+    body.append("transcription", transcript);
+
+    let meetingId = null;
+    const response = await apiFetch("/meetings", {
+      method: "POST",
+      body: body,
+    });
+
+    if (!response) {
+      setAnalysisState("failed");
+      return;
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      meetingId = data.id;
+    } else {
+      setAnalysisState("failed");
+    }
+
     for (let i = 0; i < analysisSteps.length; i++) {
       setCurrentStep(i);
       const stepProgress = ((i + 1) / analysisSteps.length) * 100;
 
-      for (let p = progress; p <= stepProgress; p += 2) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        setProgress(p);
+      if (i != analysisSteps.length - 1) {
+        for (let p = progress; p <= stepProgress; p += 2) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          setProgress(p);
+        }
+      } else {
+        setProgress(0);
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
-    setProgress(100);
-    setAnalysisState("complete");
+    async function checkStatus() {
+      const status = await apiFetch(`/meetings/${meetingId}/status`);
+      if (status && status.ok) {
+        const data = await status.json();
 
-    setTimeout(() => {
-      navigate("/meetings/1");
-    }, 1500);
+        if (data.status === "completed") {
+          for (let p = progress; p <= 100; p += 2) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            setProgress(p);
+          }
+          setAnalysisState("completed");
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          navigate(`/meetings/${meetingId}`);
+        } else if (data.status === "failed") {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          setAnalysisState("failed");
+        } else {
+          if (progress < 99) {
+            setProgress((prev) => prev + 1);
+          }
+          setTimeout(checkStatus, 3000);
+        }
+      }
+    }
+    checkStatus();
   };
 
   const handleFileUpload = (e) => {
@@ -157,6 +213,7 @@ export default function NewAnalysis() {
                           selected={meetingDate}
                           onSelect={setMeetingDate}
                           locale={ptBR}
+                          timeZone={timeZone}
                         />
                       </PopoverContent>
                     </Popover>
@@ -316,8 +373,8 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
             </Card>
           )}
 
-          {/* Analysis Complete */}
-          {analysisState === "complete" && (
+          {/* Analysis Completed */}
+          {analysisState === "completed" && (
             <Card>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
@@ -335,6 +392,21 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
                   indicatorClassName="bg-green-500"
                 />
               </CardContent>
+            </Card>
+          )}
+
+          {/* Failed State */}
+          {analysisState === "failed" && (
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                  <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                </div>
+                <CardTitle>Falha na Análise</CardTitle>
+                <CardDescription>
+                  Ocorreu um erro durante a análise. Tente Novamente.
+                </CardDescription>
+              </CardHeader>
             </Card>
           )}
         </div>
