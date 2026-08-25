@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Calendar,
-  Clock,
   Users,
   AlertTriangle,
   TrendingUp,
   MessageSquare,
   Sparkles,
-  Filter,
   Activity,
   Box,
   XCircle,
+  BotMessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,150 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../components/dashboard/Header";
 import { Link } from "react-router";
 import { SentimentTimeline } from "../../components/dashboard/SentimentTimeline";
-
-const meetingData = {
-  id: "1247082",
-  client: "Saúde & Vida Corp",
-  title: "Apresentação de Soluções de Ponto",
-  date: "2026-03-18",
-  participants: [
-    "LOCUTOR 102 (Vendedor)",
-    "LOCUTOR 49 (Vendedor)",
-    "LOCUTOR 3 (Gerente Cliente)",
-    "LOCUTOR 72 (Cliente)",
-    "LOCUTOR 63 (Cliente)",
-  ],
-  healthScore: 65,
-  sentiment: "neutro",
-  transcript: [
-    {
-      speaker: "LOCUTOR 107",
-      text: "Hoje eu sou um executivo da TOTVS que faz o atendimento que a gente chama de Corporate. Eu sou especialista no segmento de varejo e distribuição.",
-      entities: [
-        {
-          type: "role",
-          text: "especialista",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 13",
-      text: "Sim, hoje a gente, a folha está toda, a gente tem um sistema da Domini, né?",
-      entities: [
-        {
-          type: "competitor",
-          text: "Domini",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 113",
-      text: "O nosso sistema, aqui eu estava batendo ponto, o nosso sistema, a gente já está no mercado, a Totos adquiriu o sistema da Agora, há quase dois anos atrás, tá?",
-      entities: [
-        {
-          type: "product",
-          text: "Agora",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 13",
-      text: "É o século. É o século.",
-      entities: [
-        {
-          type: "competitor",
-          text: "século",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 21",
-      text: "O outro é o Contra-ID. Ele é... eu acho que deve ter uns 10, 12, eu acho.",
-      entities: [
-        {
-          type: "competitor",
-          text: "Contra-ID",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 21",
-      text: "A gente só consegue ver o ponto uma vez por mês Que é quando a gente começa o fechamento para a folha de pagamento E, muitas vezes, acontece uma situação lá no dia 20 do mês passado e a gente vai questionar o gerente, o gestor, e ele já não lembra mais o que aconteceu.",
-      entities: [
-        {
-          type: "painPoint",
-          text: "ver o ponto uma vez por mês",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 21",
-      text: "É, e uma coisa também sobre os atestados, hoje a gente tem que lançar em três lugares.",
-      entities: [
-        {
-          type: "painPoint",
-          text: "lançar em três lugares",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 21",
-      text: "Eu acho que o Regis trouxe ali no início da reunião que a gente precisa lançar tudo manual, né? O gestor faz a escala, é tudo em Excel. O gestor faz a escala no posto, vem para nós, a gente confere. A gente lança folga por folga, uma por uma dentro do ponto.",
-      entities: [
-        {
-          type: "painPoint",
-          text: "escala, é tudo em Excel",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 13",
-      text: "É a gestão das escalas e a visibilidade para o gestor fazer as suas manutenções com a gente.",
-      entities: [
-        {
-          type: "painPoint",
-          text: "gestão das escalas e a visibilidade para o gestor",
-        },
-      ],
-    },
-    {
-      speaker: "LOCUTOR 13",
-      text: "mas eu já, desde o ano passado, já venho pensando em trocar de fornecedor da Século porque ela hoje não nos atende.",
-      entities: [
-        {
-          type: "competitor",
-          text: "Século",
-        },
-        {
-          type: "painPoint",
-          text: "não nos atende",
-        },
-      ],
-    },
-  ],
-  insights: {
-    painPoints: [
-      "Portal de ponto interno desenvolvido internamente com bugs",
-      "Necessidade de gestão mais simples para coordenadores de saúde",
-      "Preocupação com custo de implementação",
-    ],
-    positiveHighlights: [
-      "Cliente é 'apaixonado' pela linha RM",
-      "Já utiliza a Folha de Pagamento da TOTVS",
-      "Aberto a conhecer o Meu RH e Clockin",
-    ],
-    riskPoints: [
-      "Menção direta ao concorrente Senior",
-      "Ameaça de buscar outras opções se o problema não for resolvido logo",
-      "Complexidade da operação 24h em ambiente de saúde",
-    ],
-    aiSuggestions: [
-      "Focar a proposta no valor da integração nativa com a Folha RM",
-      "Agendar demo do Clockin focada em biometria facial para ambiente hospitalar",
-      "Apresentar case de sucesso no segmento de Saúde",
-    ],
-  },
-};
+import { useParams } from "react-router";
+import { apiFetch } from "../../api/apiFetch";
 
 const entityStyles = {
   competitor:
@@ -193,18 +50,14 @@ const entityIcons = {
 };
 
 export default function MeetingDetailsPage() {
-  const meeting = meetingData;
-  const [showOnlyHighlights, setShowOnlyHighlights] = useState(false);
+  const [meeting, setMeeting] = useState(null);
+  const { id } = useParams();
 
   const healthScoreColor = (score) => {
     if (score >= 70) return "bg-green-500";
     if (score >= 40) return "bg-yellow-500";
     return "bg-red-500";
   };
-
-  const filteredTranscript = showOnlyHighlights
-    ? meeting.transcript.filter((entry) => entry.entities.length > 0)
-    : meeting.transcript;
 
   // Função para renderizar o texto com as entidades destacadas
   const renderHighlightedText = (text, entities) => {
@@ -239,9 +92,31 @@ export default function MeetingDetailsPage() {
     return parts;
   };
 
+  useEffect(() => {
+    const fetchMeeting = async () => {
+      try {
+        const response = await apiFetch(`/meetings/${id}/with-analysis`);
+        if (!response) return;
+        const data = await response.json();
+        setMeeting(data);
+      } catch (error) {
+        console.error("Error fetching meeting data:", error);
+      }
+    };
+    fetchMeeting();
+  }, [id]);
+
+  if (!meeting) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Carregando detalhes da reunião...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col">
-      <Header title={meeting.title} subtitle={meeting.client} />
+      <Header title={meeting.meeting.title} subtitle={meeting.meeting.client} />
 
       <div className="flex-1 space-y-6 p-4 lg:p-6">
         {/* Navegação e Metadados */}
@@ -256,16 +131,17 @@ export default function MeetingDetailsPage() {
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {new Date(meeting.date).toLocaleDateString("pt-BR", {
-                weekday: "long",
-                month: "long",
+              {new Date(
+                meeting.meeting.date.replace(/-/g, "/"),
+              ).toLocaleDateString("pt-BR", {
+                month: "short",
                 day: "numeric",
                 year: "numeric",
               })}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              {meeting.participants.length} participantes
+              {meeting.meeting.participants.length} participantes
             </span>
           </div>
         </div>
@@ -276,21 +152,25 @@ export default function MeetingDetailsPage() {
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <p className="text-4xl font-bold">{meeting.healthScore}</p>
+                  <p className="text-4xl font-bold">
+                    {meeting.analysis.health_score}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Score de Saúde
                   </p>
                 </div>
                 <div className="w-32">
                   <Progress
-                    value={meeting.healthScore}
+                    value={meeting.analysis.health_score}
                     className="h-3"
-                    indicatorClassName={healthScoreColor(meeting.healthScore)}
+                    indicatorClassName={healthScoreColor(
+                      meeting.analysis.health_score,
+                    )}
                   />
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {meeting.participants.map((p) => (
+              <div className="flex flex-wrap gap-2 justify-end">
+                {meeting.meeting.participants.map((p) => (
                   <Badge key={p} variant="secondary">
                     {p}
                   </Badge>
@@ -315,6 +195,10 @@ export default function MeetingDetailsPage() {
               <TrendingUp className="h-4 w-4" />
               Sentimento
             </TabsTrigger>
+            <TabsTrigger value="chatbot" className="gap-2">
+              <BotMessageSquare className="h-4 w-4" />
+              ChatBot
+            </TabsTrigger>
           </TabsList>
 
           {/* Aba de Transcrição */}
@@ -335,20 +219,9 @@ export default function MeetingDetailsPage() {
                     </Badge>
                   </CardDescription>
                 </div>
-                <Button
-                  variant={showOnlyHighlights ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setShowOnlyHighlights(!showOnlyHighlights)}
-                  className="gap-2"
-                >
-                  <Filter className="h-4 w-4" />
-                  {showOnlyHighlights
-                    ? "Mostrando Destaques"
-                    : "Mostrar apenas destaques"}
-                </Button>
               </CardHeader>
               <CardContent className="space-y-6 max-h-150 overflow-y-auto pr-4">
-                {filteredTranscript.map((entry, idx) => (
+                {meeting.transcript.map((entry, idx) => (
                   <div
                     key={idx}
                     className="flex flex-col space-y-1 border-l-2 border-muted pl-4 hover:border-primary transition-colors"
@@ -357,20 +230,12 @@ export default function MeetingDetailsPage() {
                       <p className="text-sm font-bold text-primary">
                         {entry.speaker}
                       </p>
-                      <span className="text-xs text-muted-foreground">
-                        {entry.timestamp}
-                      </span>
                     </div>
                     <p className="text-sm leading-relaxed text-foreground/90 flex flex-wrap">
                       {renderHighlightedText(entry.text, entry.entities)}
                     </p>
                   </div>
                 ))}
-                {filteredTranscript.length === 0 && (
-                  <div className="py-10 text-center text-muted-foreground">
-                    Nenhum destaque encontrado nesta reunião.
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -388,7 +253,7 @@ export default function MeetingDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {meeting.insights.painPoints.map((point, idx) => (
+                    {meeting.analysis.pain_points.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                         <span className="text-muted-foreground">{point}</span>
@@ -408,7 +273,7 @@ export default function MeetingDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {meeting.insights.positiveHighlights.map((point, idx) => (
+                    {meeting.analysis.highlights.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
                         <span className="text-muted-foreground">{point}</span>
@@ -428,7 +293,7 @@ export default function MeetingDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {meeting.insights.riskPoints.map((point, idx) => (
+                    {meeting.analysis.risk_factors.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
                         <span className="text-muted-foreground">{point}</span>
@@ -448,7 +313,7 @@ export default function MeetingDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {meeting.insights.aiSuggestions.map((suggestion, idx) => (
+                    {meeting.analysis.suggestions.map((suggestion, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                         <span className="text-muted-foreground">
@@ -464,7 +329,10 @@ export default function MeetingDetailsPage() {
 
           {/* Aba de Sentimento */}
           <TabsContent value="timeline">
-            <SentimentTimeline />
+            <SentimentTimeline
+              client={meeting.meeting.client}
+              sentimentData={meeting.analysis.sentiment_timeline}
+            />
           </TabsContent>
         </Tabs>
       </div>

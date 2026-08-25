@@ -16,26 +16,58 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const sentimentData = [
-  { time: "00:00", sentiment: 65, label: "Início da Reunião" },
-  { time: "10:15", sentiment: 78, label: "Paixão pela linha RM e TOTVS" },
-  { time: "12:45", sentiment: 72, label: "Interesse no Meu RH" },
-  { time: "15:30", sentiment: 45, label: "Risco: Avaliação da Senior" },
-  { time: "20:00", sentiment: 55, label: "Preocupação: Custo de Implementação" },
-  { time: "25:45", sentiment: 40, label: "Alerta: Risco de buscar outras opções" },
-  { time: "40:00", sentiment: 60, label: "Discussão de integração nativa" },
-  { time: "60:00", sentiment: 68, label: "Abertura para demo do Clockin" },
-  { time: "80:00", sentiment: 75, label: "Alinhamento de próximos passos" },
-  { time: "99:13", sentiment: 75, label: "Fechamento da Reunião" },
-];
+export function SentimentTimeline({ client, sentimentData }) {
+  const calculateAverageSentiment = (data) => {
+    if (!data || data.length === 0) return 0;
+    const totalSentiment = data.reduce(
+      (sum, entry) => sum + entry.sentiment,
+      0,
+    );
+    return (totalSentiment / data.length).toFixed(0);
+  };
 
-export function SentimentTimeline() {
+  const getHighestSentiment = (sentimentData) => {
+    if (!sentimentData || sentimentData.length === 0) return null;
+    const data = sentimentData.reduce((max, entry) =>
+      entry.sentiment > max.sentiment ? entry : max,
+    );
+    data["label"] = data["label"]
+      .substring(data["label"].indexOf(":") + 1)
+      .trim();
+    return data;
+  };
+
+  const getLowestSentiment = (sentimentData) => {
+    if (!sentimentData || sentimentData.length === 0) return null;
+    const data = sentimentData.reduce((min, entry) =>
+      entry.sentiment < min.sentiment ? entry : min,
+    );
+    data["label"] = data["label"]
+      .substring(data["label"].indexOf(":") + 1)
+      .trim();
+    return data;
+  };
+
+  const getFinalSentiment = (data) => {
+    if (!data || data.length === 0) return null;
+    const finalEntry = data[data.length - 1];
+    return {
+      sentiment: finalEntry.sentiment,
+      label: finalEntry.label.includes(":")
+        ? finalEntry.label.substring(finalEntry.label.indexOf(":") + 1).trim()
+        : finalEntry.label,
+    };
+  };
+
+  const final = getFinalSentiment(sentimentData);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Linha do Tempo de Sentimento</CardTitle>
         <CardDescription>
-          Acompanhe a evolução do sentimento baseada nos marcos da reunião com a Saúde & Vida Corp.
+          Acompanhe a evolução do sentimento baseada nos marcos da reunião com a{" "}
+          {client}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -68,7 +100,7 @@ export function SentimentTimeline() {
                 tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                 axisLine={{ stroke: "var(--border)" }}
                 label={{
-                  value: "Duração da Reunião",
+                  value: "Tempo da Reunião",
                   position: "insideBottom",
                   offset: -5,
                   fill: "var(--muted-foreground)",
@@ -100,11 +132,11 @@ export function SentimentTimeline() {
                 ]}
               />
               <ReferenceLine
-                y={65}
+                y={calculateAverageSentiment(sentimentData)}
                 stroke="var(--muted-foreground)"
                 strokeDasharray="5 5"
                 label={{
-                  value: "Média (65%)",
+                  value: `Média (${calculateAverageSentiment(sentimentData)}%)`,
                   position: "right",
                   fill: "var(--muted-foreground)",
                   fontSize: 10,
@@ -132,28 +164,38 @@ export function SentimentTimeline() {
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              78%
+              {getHighestSentiment(sentimentData)["sentiment"]}%
             </p>
             <p className="text-sm text-muted-foreground">Pico de Sentimento</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              às 10:15 - Paixão pela linha RM
+              Tempo {getHighestSentiment(sentimentData)["time"]} -{" "}
+              {getHighestSentiment(sentimentData)["label"]}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              40%
+              {getLowestSentiment(sentimentData)["sentiment"]}%
             </p>
             <p className="text-sm text-muted-foreground">Ponto Mais Baixo</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              às 25:45 - Risco de buscar outras opções
+              Tempo {getLowestSentiment(sentimentData)["time"]} -{" "}
+              {getLowestSentiment(sentimentData)["label"]}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-2xl font-bold text-primary">+10%</p>
-            <p className="text-sm text-muted-foreground">Variação Líquida</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Recuperação com foco em integração
+            <p
+              className={`text-2xl font-bold ${
+                final.sentiment >= 70
+                  ? "text-green-600"
+                  : final.sentiment <= 40
+                    ? "text-red-600"
+                    : "text-yellow-600"
+              }`}
+            >
+              {final.sentiment}%
             </p>
+            <p className="text-sm text-muted-foreground">Sentimento Final</p>
+            <p className="mt-1 text-xs text-muted-foreground">{final.label}</p>
           </div>
         </div>
       </CardContent>
