@@ -15,6 +15,7 @@ import {
   Ear,
   CheckCircle2,
   Info,
+  User,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,22 +36,22 @@ import MeetingChatbot from "../../components/dashboard/MeetingChatBot";
 
 const entityStyles = {
   competitor:
-    "bg-red-500/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700",
+    "bg-red-500/10 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
   product:
-    "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700",
-  role: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700",
+    "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  role: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
   painPoint:
-    "bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700",
+    "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800",
   churnRisk:
-    "bg-rose-900/30 text-rose-800 dark:text-rose-200 border-rose-400 dark:border-rose-800",
+    "bg-rose-900/20 text-rose-800 dark:text-rose-200 border-rose-300 dark:border-rose-800",
 };
 
 const entityIcons = {
-  competitor: <AlertTriangle className="h-3 w-3" />,
-  product: <Box className="h-3 w-3" />,
-  role: <Users className="h-3 w-3" />,
-  painPoint: <XCircle className="h-3 w-3" />,
-  churnRisk: <Activity className="h-3 w-3" />,
+  competitor: <AlertTriangle className="h-3 w-3 shrink-0" />,
+  product: <Box className="h-3 w-3 shrink-0" />,
+  role: <Users className="h-3 w-3 shrink-0" />,
+  painPoint: <XCircle className="h-3 w-3 shrink-0" />,
+  churnRisk: <Activity className="h-3 w-3 shrink-0" />,
 };
 
 export default function MeetingDetailsPage() {
@@ -63,7 +64,6 @@ export default function MeetingDetailsPage() {
     return "bg-red-500";
   };
 
-  // Trata o float retornado pelo backend (seja 43.5 ou 0.435)
   const getTalkToListenMetrics = () => {
     const rawRatio = meeting?.analysis?.talk_to_listen_ratio;
     if (rawRatio === undefined || rawRatio === null) return null;
@@ -73,8 +73,6 @@ export default function MeetingDetailsPage() {
     totvsPercentage = Math.min(Math.max(totvsPercentage, 0), 100);
 
     const clientPercentage = 100 - totvsPercentage;
-
-    // Proporção ideal em Vendas/CS: TOTVS fala entre 30% e 45% do tempo
     const isIdealRatio = totvsPercentage >= 30 && totvsPercentage <= 45;
 
     return {
@@ -84,6 +82,7 @@ export default function MeetingDetailsPage() {
     };
   };
 
+  // Funcao otimizada para renderizar o texto sem quebras de linha indesejadas
   const renderHighlightedText = (text, entities) => {
     if (!entities || entities.length === 0) return text;
 
@@ -102,10 +101,10 @@ export default function MeetingDetailsPage() {
             newParts.push(
               <span
                 key={`${entity.text}-${i}`}
-                className={`px-1 rounded border ${entityStyles[entity.type]} font-medium mx-0.5 flex items-center gap-1 text-xs`}
+                className={`inline-flex items-center gap-1 my-0.5 px-1.5 py-0.5 rounded-md border text-xs font-medium align-baseline shadow-2xs transition-colors ${entityStyles[entity.type]}`}
               >
                 {entityIcons[entity.type]}
-                {entity.text}
+                <span>{entity.text}</span>
               </span>,
             );
           }
@@ -172,7 +171,7 @@ export default function MeetingDetailsPage() {
           </div>
         </div>
 
-        {/* Dashboard de Visão Geral: Health Score + Talk to Listen Ratio */}
+        {/* Dashboard de Visão Geral */}
         <div className="grid gap-6 md:grid-cols-3">
           {/* Card de Score de Saúde */}
           <Card className="md:col-span-1 flex flex-col justify-between shadow-xs">
@@ -253,7 +252,6 @@ export default function MeetingDetailsPage() {
                     </span>
                   </div>
 
-                  {/* Barra Visual Bipartida */}
                   <div className="flex h-4 w-full overflow-hidden rounded-full bg-muted p-0.5 ring-1 ring-border">
                     <div
                       className="h-full rounded-l-full bg-primary transition-all duration-500"
@@ -302,37 +300,83 @@ export default function MeetingDetailsPage() {
 
           {/* Aba de Transcrição */}
           <TabsContent value="transcript" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between space-y-0">
-                <div>
-                  <CardTitle>Transcrição da Reunião</CardTitle>
-                  <CardDescription className="mt-2 flex flex-wrap gap-2">
-                    <Badge className={entityStyles.product}>Produtos</Badge>
-                    <Badge className={entityStyles.competitor}>
+            <Card className="shadow-xs">
+              <CardHeader className="border-b border-border/50 pb-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      Transcrição com Mapeamento de Entidades
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                      Palavras-chave destacadas por IA para análise rápida de
+                      contexto
+                    </CardDescription>
+                  </div>
+                  {/* Legenda de Entidades Refinada */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <Badge
+                      variant="outline"
+                      className={`${entityStyles.product} border font-normal`}
+                    >
+                      Produtos
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`${entityStyles.competitor} border font-normal`}
+                    >
                       Concorrentes
                     </Badge>
-                    <Badge className={entityStyles.role}>Cargos</Badge>
-                    <Badge className={entityStyles.painPoint}>Dores</Badge>
-                    <Badge className={entityStyles.churnRisk}>
-                      Risco de Churn
+                    <Badge
+                      variant="outline"
+                      className={`${entityStyles.role} border font-normal`}
+                    >
+                      Cargos
                     </Badge>
-                  </CardDescription>
+                    <Badge
+                      variant="outline"
+                      className={`${entityStyles.painPoint} border font-normal`}
+                    >
+                      Dores
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`${entityStyles.churnRisk} border font-normal`}
+                    >
+                      Risco Churn
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6 max-h-150 overflow-y-auto pr-4">
+
+              {/* Lista de Falas da Transcrição */}
+              <CardContent className="p-4 sm:p-6 space-y-4 max-h-[600px] overflow-y-auto">
                 {meeting.transcript.map((entry, idx) => (
                   <div
                     key={idx}
-                    className="flex flex-col space-y-1 border-l-2 border-muted pl-4 hover:border-primary transition-colors"
+                    className="group relative flex gap-3 p-3.5 rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-border/80 transition-all duration-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-primary">
-                        {entry.speaker}
+                    {/* Icone / Avatar do Participante */}
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-xs ring-1 ring-primary/20 mt-0.5">
+                      {entry.speaker.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-foreground tracking-tight">
+                          {entry.speaker}
+                        </span>
+                        {entry.time && (
+                          <span className="text-[11px] font-mono text-muted-foreground bg-background/80 px-2 py-0.5 rounded-md border border-border/40">
+                            {entry.time}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Texto Corrido sem Quebra de Linha Desnecessaria */}
+                      <p className="text-sm text-foreground/90 leading-relaxed font-normal break-words">
+                        {renderHighlightedText(entry.text, entry.entities)}
                       </p>
                     </div>
-                    <p className="text-sm leading-relaxed text-foreground/90 flex flex-wrap">
-                      {renderHighlightedText(entry.text, entry.entities)}
-                    </p>
                   </div>
                 ))}
               </CardContent>
