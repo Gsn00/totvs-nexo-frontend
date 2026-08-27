@@ -214,63 +214,94 @@ export default function MeetingDetailsPage() {
           </Card>
 
           {/* Card de Proporção Falar vs. Ouvir */}
+          {/* Card de Proporção Falar vs. Ouvir */}
           {talkMetrics && (
-            <Card className="md:col-span-2 flex flex-col justify-between shadow-xs">
+            <Card className="md:col-span-2 flex flex-col justify-between shadow-xs border-border/60">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Mic className="h-4 w-4 text-primary" />
+                  <Mic className="h-4 w-4 text-primary/80" />
                   Proporção Falar vs. Ouvir (Talk-to-Listen)
                 </CardTitle>
                 <Badge
-                  variant={talkMetrics.isIdealRatio ? "default" : "outline"}
-                  className={`gap-1 text-xs font-normal ${
+                  variant="outline"
+                  className={`gap-1.5 text-xs font-medium transition-colors ${
                     talkMetrics.isIdealRatio
-                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800"
-                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800"
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                   }`}
                 >
                   {talkMetrics.isIdealRatio ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                   )}
                   {talkMetrics.isIdealRatio
                     ? "Equilíbrio Ideal"
                     : "TOTVS Falou em Excesso"}
                 </Badge>
               </CardHeader>
+
               <CardContent className="p-6 pt-2 flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="flex items-center gap-1.5 text-primary">
-                      <Mic className="h-3.5 w-3.5" />
-                      Time TOTVS ({talkMetrics.totvsPercentage}%)
+                <div className="space-y-2.5">
+                  {/* Cabeçalho das Porcentagens */}
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="flex items-center gap-1.5 text-foreground/90 animate-in fade-in duration-700">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      Time TOTVS:{" "}
+                      <strong className="font-semibold text-primary">
+                        {talkMetrics.totvsPercentage}%
+                      </strong>
                     </span>
-                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                      <Ear className="h-3.5 w-3.5" />
-                      {meeting.meeting.client} ({talkMetrics.clientPercentage}%)
+                    <span className="flex items-center gap-1.5 text-muted-foreground animate-in fade-in duration-700">
+                      <span className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-500" />
+                      {meeting.meeting.client}:{" "}
+                      <strong className="font-semibold text-foreground/80">
+                        {talkMetrics.clientPercentage}%
+                      </strong>
                     </span>
                   </div>
 
-                  <div className="flex h-4 w-full overflow-hidden rounded-full bg-muted p-0.5 ring-1 ring-border">
+                  {/* Container da Barra com Animação e Zona Alvo */}
+                  <div className="relative">
+                    <div className="relative flex h-3.5 w-full overflow-hidden rounded-full bg-muted/60 p-0.5 ring-1 ring-border/50">
+                      {/* Lado TOTVS */}
+                      <div
+                        className="h-full rounded-l-full bg-primary/85 hover:bg-primary transition-all duration-1000 ease-out shadow-2xs"
+                        style={{ width: `${talkMetrics.totvsPercentage}%` }}
+                      />
+                      {/* Lado Cliente */}
+                      <div
+                        className="h-full rounded-r-full bg-slate-400/70 dark:bg-slate-600/70 hover:bg-slate-400 transition-all duration-1000 ease-out"
+                        style={{ width: `${talkMetrics.clientPercentage}%` }}
+                      />
+                    </div>
+
+                    {/* Marcador Discreto da Faixa Ideal (30% a 45%) */}
                     <div
-                      className="h-full rounded-l-full bg-primary transition-all duration-500"
-                      style={{ width: `${talkMetrics.totvsPercentage}%` }}
+                      className="absolute top-0 h-3.5 border-x-2 border-dashed border-primary/40 bg-primary/5 pointer-events-none transition-opacity duration-500"
+                      style={{ left: "30%", width: "15%" }}
+                      title="Faixa Ideal de Fala (30% - 45%)"
                     />
-                    <div
-                      className="h-full rounded-r-full bg-emerald-500 transition-all duration-500"
-                      style={{ width: `${talkMetrics.clientPercentage}%` }}
-                    />
+                  </div>
+
+                  {/* Legenda do Marcador */}
+                  <div className="flex justify-between text-[10px] text-muted-foreground/70 px-0.5">
+                    <span>0%</span>
+                    <span className="text-primary/70 font-medium">
+                      Zona Ideal TOTVS (30% - 45%)
+                    </span>
+                    <span>100%</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">
+                {/* Nota de Recomendação */}
+                <p className="text-xs text-muted-foreground/90 pt-2 border-t border-border/40 leading-relaxed">
                   <strong className="font-semibold text-foreground">
                     Recomendação:
                   </strong>{" "}
-                  O tempo ideal de fala da equipe em reuniões de acompanhamento
-                  é entre <strong>30% e 45%</strong> para dar mais espaço à
-                  escuta do cliente.
+                  O tempo de fala ideal da equipe em reuniões de acompanhamento
+                  é de <strong>30% a 45%</strong>, permitindo maior engajamento
+                  do cliente.
                 </p>
               </CardContent>
             </Card>
