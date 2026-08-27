@@ -12,10 +12,8 @@ import {
   XCircle,
   BotMessageSquare,
   Mic,
-  Ear,
   CheckCircle2,
   Info,
-  User,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,11 +71,16 @@ export default function MeetingDetailsPage() {
     totvsPercentage = Math.min(Math.max(totvsPercentage, 0), 100);
 
     const clientPercentage = 100 - totvsPercentage;
-    const isIdealRatio = totvsPercentage >= 30 && totvsPercentage <= 45;
+    const minIdealRatio = 30;
+    const maxIdealRatio = 45;
+    const isIdealRatio =
+      totvsPercentage >= minIdealRatio && totvsPercentage <= maxIdealRatio;
 
     return {
       totvsPercentage,
       clientPercentage,
+      minIdealRatio,
+      maxIdealRatio,
       isIdealRatio,
     };
   };
@@ -214,7 +217,6 @@ export default function MeetingDetailsPage() {
           </Card>
 
           {/* Card de Proporção Falar vs. Ouvir */}
-          {/* Card de Proporção Falar vs. Ouvir */}
           {talkMetrics && (
             <Card className="md:col-span-2 flex flex-col justify-between shadow-xs border-border/60">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
@@ -235,9 +237,11 @@ export default function MeetingDetailsPage() {
                   ) : (
                     <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                   )}
-                  {talkMetrics.isIdealRatio
-                    ? "Equilíbrio Ideal"
-                    : "TOTVS Falou em Excesso"}
+                  {talkMetrics.isIdealRatio && "Equilíbrio Ideal"}
+                  {talkMetrics.totvsPercentage < talkMetrics.minIdealRatio &&
+                    "TOTVS Falando Pouco"}
+                  {talkMetrics.totvsPercentage > talkMetrics.maxIdealRatio &&
+                    "TOTVS Falando Demais"}
                 </Badge>
               </CardHeader>
 
