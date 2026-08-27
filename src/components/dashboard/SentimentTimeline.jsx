@@ -28,24 +28,28 @@ export function SentimentTimeline({ client, sentimentData }) {
 
   const getHighestSentiment = (sentimentData) => {
     if (!sentimentData || sentimentData.length === 0) return null;
-    const data = sentimentData.reduce((max, entry) =>
-      entry.sentiment > max.sentiment ? entry : max,
+    const entry = sentimentData.reduce((max, item) =>
+      item.sentiment > max.sentiment ? item : max,
     );
-    data["label"] = data["label"]
-      .substring(data["label"].indexOf(":") + 1)
-      .trim();
-    return data;
+    return {
+      ...entry,
+      label: entry.label.includes(":")
+        ? entry.label.substring(entry.label.indexOf(":") + 1).trim()
+        : entry.label,
+    };
   };
 
   const getLowestSentiment = (sentimentData) => {
     if (!sentimentData || sentimentData.length === 0) return null;
-    const data = sentimentData.reduce((min, entry) =>
-      entry.sentiment < min.sentiment ? entry : min,
+    const entry = sentimentData.reduce((min, item) =>
+      item.sentiment < min.sentiment ? item : min,
     );
-    data["label"] = data["label"]
-      .substring(data["label"].indexOf(":") + 1)
-      .trim();
-    return data;
+    return {
+      ...entry,
+      label: entry.label.includes(":")
+        ? entry.label.substring(entry.label.indexOf(":") + 1).trim()
+        : entry.label,
+    };
   };
 
   const getFinalSentiment = (data) => {
