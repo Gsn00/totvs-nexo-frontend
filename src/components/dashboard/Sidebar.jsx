@@ -24,6 +24,7 @@ const navigation = [
   { name: "Reuniões", href: "/meetings", icon: Calendar },
   { name: "Nova Análise", href: "/new-analysis", icon: PlusCircle },
   { name: "Usuários", href: "/users", icon: Users },
+  { name: "Desenvolvedor", href: "/developer", icon: Settings },
 ];
 
 export default function Sidebar() {

@@ -7,6 +7,7 @@ import MeetingDetailsPage from "../pages/dashboard/MeetingPage";
 import NewAnalysis from "../pages/dashboard/NewAnalysis";
 import ProtectedRoute from "../components/protected-route";
 import UsersPage from "../pages/dashboard/UsersPage";
+import DeveloperPage from "../pages/dashboard/DeveloperPage";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
       {
         path: "/users",
         element: <UsersPage />,
+      },
+      {
+        path: "/developer",
+        element: <DeveloperPage />,
       },
     ],
   },
