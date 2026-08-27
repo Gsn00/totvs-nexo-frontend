@@ -180,7 +180,7 @@ export default function MeetingDetailsPage() {
           <Card className="md:col-span-1 flex flex-col justify-between shadow-xs">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Score de Saúde da Conta
+                Score de Saúde da Reunião
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 pt-0">

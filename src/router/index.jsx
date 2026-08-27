@@ -6,6 +6,7 @@ import HomePage from "../pages/dashboard/HomePage";
 import MeetingDetailsPage from "../pages/dashboard/MeetingPage";
 import NewAnalysis from "../pages/dashboard/NewAnalysis";
 import ProtectedRoute from "../components/protected-route";
+import UsersPage from "../pages/dashboard/UsersPage";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: "/new-analysis",
         element: <NewAnalysis />,
+      },
+      {
+        path: "/users",
+        element: <UsersPage />,
       },
     ],
   },

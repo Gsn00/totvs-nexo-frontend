@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Calendar,
   PlusCircle,
+  Users,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Reuniões", href: "/meetings", icon: Calendar },
   { name: "Nova Análise", href: "/new-analysis", icon: PlusCircle },
+  { name: "Usuários", href: "/users", icon: Users },
 ];
 
 export default function Sidebar() {
