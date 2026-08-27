@@ -123,7 +123,7 @@ export function MeetingChatbot() {
               type="button"
               variant="outline"
               size="sm"
-              className="h-auto border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-xs font-medium transition-all duration-200 whitespace-normal text-left shadow-xs"
+              className="h-auto py-0.5 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-xs font-medium transition-all duration-200 whitespace-normal text-left shadow-xs"
               onClick={() => handleSendQuestion(prompt)}
             >
               <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary shrink-0" />
