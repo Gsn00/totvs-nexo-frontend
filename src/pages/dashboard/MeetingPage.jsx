@@ -11,6 +11,10 @@ import {
   Box,
   XCircle,
   BotMessageSquare,
+  Mic,
+  Ear,
+  CheckCircle2,
+  Info,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,9 +28,8 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../components/dashboard/Header";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import { SentimentTimeline } from "../../components/dashboard/SentimentTimeline";
-import { useParams } from "react-router";
 import { apiFetch } from "../../api/apiFetch";
 import MeetingChatbot from "../../components/dashboard/MeetingChatBot";
 
@@ -60,7 +63,27 @@ export default function MeetingDetailsPage() {
     return "bg-red-500";
   };
 
-  // Função para renderizar o texto com as entidades destacadas
+  // Trata o float retornado pelo backend (seja 43.5 ou 0.435)
+  const getTalkToListenMetrics = () => {
+    const rawRatio = meeting?.analysis?.talk_to_listen_ratio;
+    if (rawRatio === undefined || rawRatio === null) return null;
+
+    let totvsPercentage =
+      rawRatio <= 1 ? Math.round(rawRatio * 100) : Math.round(rawRatio);
+    totvsPercentage = Math.min(Math.max(totvsPercentage, 0), 100);
+
+    const clientPercentage = 100 - totvsPercentage;
+
+    // Proporção ideal em Vendas/CS: TOTVS fala entre 30% e 45% do tempo
+    const isIdealRatio = totvsPercentage >= 30 && totvsPercentage <= 45;
+
+    return {
+      totvsPercentage,
+      clientPercentage,
+      isIdealRatio,
+    };
+  };
+
   const renderHighlightedText = (text, entities) => {
     if (!entities || entities.length === 0) return text;
 
@@ -115,6 +138,8 @@ export default function MeetingDetailsPage() {
     );
   }
 
+  const talkMetrics = getTalkToListenMetrics();
+
   return (
     <div className="flex flex-col">
       <Header title={meeting.meeting.title} subtitle={meeting.meeting.client} />
@@ -147,20 +172,26 @@ export default function MeetingDetailsPage() {
           </div>
         </div>
 
-        {/* Card de Score de Saúde */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <p className="text-4xl font-bold">
+        {/* Dashboard de Visão Geral: Health Score + Talk to Listen Ratio */}
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Card de Score de Saúde */}
+          <Card className="md:col-span-1 flex flex-col justify-between shadow-xs">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Score de Saúde da Conta
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 pt-0">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-5xl font-extrabold tracking-tight">
                     {meeting.analysis.health_score}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Score de Saúde
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Baseado em engajamento e tom
                   </p>
                 </div>
-                <div className="w-32">
+                <div className="w-24 flex flex-col gap-2">
                   <Progress
                     value={meeting.analysis.health_score}
                     className="h-3"
@@ -168,20 +199,87 @@ export default function MeetingDetailsPage() {
                       meeting.analysis.health_score,
                     )}
                   />
+                  <span className="text-[10px] text-right text-muted-foreground font-medium">
+                    Meta: &gt;70%
+                  </span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 justify-end">
+              <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border/50">
                 {meeting.meeting.participants.map((p) => (
-                  <Badge key={p} variant="secondary">
+                  <Badge key={p} variant="secondary" className="text-[11px]">
                     {p}
                   </Badge>
                 ))}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Conteúdo Principal */}
+          {/* Card de Proporção Falar vs. Ouvir */}
+          {talkMetrics && (
+            <Card className="md:col-span-2 flex flex-col justify-between shadow-xs">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Mic className="h-4 w-4 text-primary" />
+                  Proporção Falar vs. Ouvir (Talk-to-Listen)
+                </CardTitle>
+                <Badge
+                  variant={talkMetrics.isIdealRatio ? "default" : "outline"}
+                  className={`gap-1 text-xs font-normal ${
+                    talkMetrics.isIdealRatio
+                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800"
+                  }`}
+                >
+                  {talkMetrics.isIdealRatio ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    <Info className="h-3.5 w-3.5" />
+                  )}
+                  {talkMetrics.isIdealRatio
+                    ? "Equilíbrio Ideal"
+                    : "TOTVS Falou em Excesso"}
+                </Badge>
+              </CardHeader>
+              <CardContent className="p-6 pt-2 flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="flex items-center gap-1.5 text-primary">
+                      <Mic className="h-3.5 w-3.5" />
+                      Time TOTVS ({talkMetrics.totvsPercentage}%)
+                    </span>
+                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <Ear className="h-3.5 w-3.5" />
+                      {meeting.meeting.client} ({talkMetrics.clientPercentage}%)
+                    </span>
+                  </div>
+
+                  {/* Barra Visual Bipartida */}
+                  <div className="flex h-4 w-full overflow-hidden rounded-full bg-muted p-0.5 ring-1 ring-border">
+                    <div
+                      className="h-full rounded-l-full bg-primary transition-all duration-500"
+                      style={{ width: `${talkMetrics.totvsPercentage}%` }}
+                    />
+                    <div
+                      className="h-full rounded-r-full bg-emerald-500 transition-all duration-500"
+                      style={{ width: `${talkMetrics.clientPercentage}%` }}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">
+                  <strong className="font-semibold text-foreground">
+                    Recomendação:
+                  </strong>{" "}
+                  O tempo ideal de fala da equipe em reuniões de acompanhamento
+                  é entre <strong>30% e 45%</strong> para dar mais espaço à
+                  escuta do cliente.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Conteúdo Principal em Abas */}
         <Tabs defaultValue="transcript" className="flex flex-col space-y-6">
           <TabsList>
             <TabsTrigger value="transcript" className="gap-2">
@@ -244,7 +342,6 @@ export default function MeetingDetailsPage() {
           {/* Aba de Insights */}
           <TabsContent value="insights" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Pain Points */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
@@ -264,7 +361,6 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Destaques Positivos */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -284,7 +380,6 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Pontos de Risco */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
@@ -304,7 +399,6 @@ export default function MeetingDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Sugestões da IA */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
