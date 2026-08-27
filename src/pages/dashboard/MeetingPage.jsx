@@ -28,6 +28,7 @@ import { Link } from "react-router";
 import { SentimentTimeline } from "../../components/dashboard/SentimentTimeline";
 import { useParams } from "react-router";
 import { apiFetch } from "../../api/apiFetch";
+import MeetingChatbot from "../../components/dashboard/MeetingChatBot";
 
 const entityStyles = {
   competitor:
@@ -333,6 +334,11 @@ export default function MeetingDetailsPage() {
               client={meeting.meeting.client}
               sentimentData={meeting.analysis.sentiment_timeline}
             />
+          </TabsContent>
+
+          {/* Aba de ChatBot */}
+          <TabsContent value="chatbot">
+            <MeetingChatbot />
           </TabsContent>
         </Tabs>
       </div>
