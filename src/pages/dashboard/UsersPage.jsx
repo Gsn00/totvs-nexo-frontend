@@ -60,6 +60,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import Header from "../../components/dashboard/Header";
 import { apiFetch } from "@/api/apiFetch";
+import { PaginationControl } from "@/components/ui/pagination-control";
 
 const roleStyles = {
   developer: {
@@ -410,31 +411,13 @@ export default function UsersPage() {
             </div>
 
             {/* Paginação padronizada */}
-            <div className="flex items-center justify-between pt-4">
-              <div className="text-sm text-muted-foreground">
-                Página <strong className="text-foreground">{page}</strong> de{" "}
-                <strong className="text-foreground">
-                  {pagination.totalPages}
-                </strong>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1 || isLoading}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= pagination.totalPages || isLoading}
-                >
-                  Próxima
-                </Button>
-              </div>
+            <div className="pt-4">
+              <PaginationControl
+                currentPage={page}
+                totalPages={pagination.totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
             </div>
           </CardContent>
         </Card>

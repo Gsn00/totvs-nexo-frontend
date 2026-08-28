@@ -29,6 +29,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import Header from "../../components/dashboard/Header";
 import { apiFetch } from "@/api/apiFetch";
+import { PaginationControl } from "@/components/ui/pagination-control";
 
 const logLevelStyles = {
   ERROR:
@@ -262,33 +263,13 @@ export default function DeveloperPage() {
           </CardContent>
 
           {/* Paginação do Console de Logs */}
-          <div className="flex items-center justify-between p-4 border-t border-border/40">
-            <div className="text-xs text-muted-foreground">
-              Página <strong className="text-foreground">{logsPage}</strong> de{" "}
-              <strong className="text-foreground">
-                {logsPagination.totalPages || 1}
-              </strong>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
-                disabled={logsPage === 1 || isLoading}
-                className="h-8 text-xs"
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLogsPage((p) => p + 1)}
-                disabled={logsPage >= logsPagination.totalPages || isLoading}
-                className="h-8 text-xs"
-              >
-                Próxima
-              </Button>
-            </div>
+          <div className="px-4">
+            <PaginationControl
+              currentPage={logsPage}
+              totalPages={logsPagination.totalPages}
+              onPageChange={(newPage) => setLogsPage(newPage)}
+              isLoading={isLoading}
+            />
           </div>
         </Card>
       </div>
