@@ -45,8 +45,8 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
+  DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -90,8 +90,10 @@ export default function UsersPage() {
 
   // Paginação
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const limit = 10;
+  const [pagination, setPagination] = useState({
+    totalUsers: 0,
+    totalPages: 1,
+  });
 
   // Estados de Modal Form (Criar/Editar)
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -110,16 +112,19 @@ export default function UsersPage() {
   const [deletingUser, setDeletingUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Carregar Usuários com paginação
+  // Carregar Usuários com paginação padronizada
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await apiFetch(`/users?page=${page}&limit=${limit}`);
+      const response = await apiFetch(`/users?page=${page}&limit=10`);
       if (response && response.ok) {
         const data = await response.json();
-        setUsers(data);
-        // Se retornou menos itens que o limite, não há próxima página
-        setHasMore(data.length === limit);
+
+        setUsers(data.users || []);
+        setPagination({
+          totalUsers: data.total_users || 0,
+          totalPages: data.total_pages || 1,
+        });
       }
     } catch (error) {
       console.error("Erro ao carregar usuários:", error);
@@ -130,7 +135,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page]); // Recarrega sempre que a página mudar
+  }, [page]);
 
   const handleOpenCreate = () => {
     setEditingUser(null);
@@ -197,7 +202,6 @@ export default function UsersPage() {
 
       if (response && (response.ok || response.status === 204)) {
         setDeletingUser(null);
-        // Voltar para a página 1 após deletar ajuda a evitar páginas em branco
         if (page !== 1) {
           setPage(1);
         } else {
@@ -211,7 +215,7 @@ export default function UsersPage() {
     }
   };
 
-  // Filtragem local
+  // Filtragem local dos itens carregados na página
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -235,7 +239,8 @@ export default function UsersPage() {
               <div>
                 <CardTitle>Todos os Usuários</CardTitle>
                 <CardDescription>
-                  Página {page} - Gerencie os usuários do sistema
+                  Exibindo {filteredUsers.length} de {pagination.totalUsers}{" "}
+                  usuários cadastrados
                 </CardDescription>
               </div>
 
@@ -404,9 +409,14 @@ export default function UsersPage() {
               </Table>
             </div>
 
-            {/* Paginação */}
+            {/* Paginação padronizada */}
             <div className="flex items-center justify-between pt-4">
-              <div className="text-sm text-muted-foreground">Página {page}</div>
+              <div className="text-sm text-muted-foreground">
+                Página <strong className="text-foreground">{page}</strong> de{" "}
+                <strong className="text-foreground">
+                  {pagination.totalPages}
+                </strong>
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -420,7 +430,7 @@ export default function UsersPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={!hasMore || isLoading}
+                  disabled={page >= pagination.totalPages || isLoading}
                 >
                   Próxima
                 </Button>
