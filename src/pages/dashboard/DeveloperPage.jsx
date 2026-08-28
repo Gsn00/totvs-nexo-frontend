@@ -44,6 +44,13 @@ export default function DeveloperPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [logFilter, setLogFilter] = useState("ALL");
 
+  // Paginação dos Logs
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsPagination, setLogsPagination] = useState({
+    totalLogs: 0,
+    totalPages: 1,
+  });
+
   // Modal Stacktrace
   const [selectedLog, setSelectedLog] = useState(null);
 
@@ -57,11 +64,17 @@ export default function DeveloperPage() {
         setMetrics(data);
       }
 
-      // 2. Logs do Sistema
-      const logsRes = await apiFetch(`/dev/logs?level=${logFilter}`);
+      // 2. Logs do Sistema Paginados (20 por página)
+      const logsRes = await apiFetch(
+        `/dev/logs?page=${logsPage}&limit=20&level=${logFilter}`,
+      );
       if (logsRes && logsRes.ok) {
         const data = await logsRes.json();
-        setLogs(data);
+        setLogs(data.logs);
+        setLogsPagination({
+          totalLogs: data.total_logs,
+          totalPages: data.total_pages,
+        });
       }
     } catch (err) {
       console.error("Erro ao carregar dev console:", err);
@@ -72,7 +85,13 @@ export default function DeveloperPage() {
 
   useEffect(() => {
     loadDevData();
-  }, [logFilter]);
+  }, [logFilter, logsPage]);
+
+  // Ao mudar o filtro, volta para a página 1
+  const handleFilterChange = (newLevel) => {
+    setLogFilter(newLevel);
+    setLogsPage(1);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -155,8 +174,8 @@ export default function DeveloperPage() {
                   Console de Logs do Sistema
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
-                  Rastreamento do backend com indicação de Cliente, Título e
-                  Timestamp
+                  Exibindo {logs.length} de {logsPagination.totalLogs} logs
+                  gravados no sistema
                 </CardDescription>
               </div>
 
@@ -167,7 +186,7 @@ export default function DeveloperPage() {
                     key={lvl}
                     size="sm"
                     variant={logFilter === lvl ? "default" : "outline"}
-                    onClick={() => setLogFilter(lvl)}
+                    onClick={() => handleFilterChange(lvl)}
                     className="text-xs h-8 rounded-lg font-medium transition-all"
                   >
                     {lvl === "ALL" ? "Todos" : lvl}
@@ -177,39 +196,39 @@ export default function DeveloperPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="p-4 bg-slate-950 text-slate-100 rounded-b-xl font-mono text-xs max-h-[520px] overflow-y-auto space-y-2.5">
+          <CardContent className="p-4 bg-muted/40 text-foreground rounded-b-xl font-mono text-xs max-h-[520px] overflow-y-auto space-y-2.5">
             {isLoading ? (
-              <div className="flex items-center justify-center h-40 gap-2 text-slate-500">
+              <div className="flex items-center justify-center h-40 gap-2 text-muted-foreground">
                 <Spinner className="h-5 w-5 text-primary" />
                 <span>Buscando logs em tempo real...</span>
               </div>
             ) : logs.length === 0 ? (
-              <p className="text-slate-500 text-center py-10">
+              <p className="text-muted-foreground text-center py-10">
                 Nenhum log registrado para este filtro.
               </p>
             ) : (
               logs.map((log) => (
                 <div
                   key={log.id}
-                  className="group flex flex-col gap-2 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 transition-all duration-200"
+                  className="group flex flex-col gap-2 p-3 rounded-xl bg-card border border-border/70 hover:border-border hover:bg-accent/40 transition-all duration-200 shadow-2xs"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-slate-400 font-mono text-[11px] flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded-md">
-                        <Calendar className="h-3 w-3 text-slate-500" />
+                      <span className="text-muted-foreground font-mono text-[11px] flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md border border-border/40">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
                         {new Date(log.created_at).toLocaleString("pt-BR")}
                       </span>
 
                       <Badge
                         variant="outline"
                         className={`text-[10px] font-mono px-2 py-0.5 rounded-md uppercase font-semibold ${
-                          logLevelStyles[log.level] || "text-slate-400"
+                          logLevelStyles[log.level] || "text-muted-foreground"
                         }`}
                       >
                         {log.level}
                       </Badge>
 
-                      <span className="text-slate-400 font-semibold">
+                      <span className="text-muted-foreground font-semibold">
                         [{log.source}]
                       </span>
                     </div>
@@ -219,7 +238,7 @@ export default function DeveloperPage() {
                         size="xs"
                         variant="ghost"
                         onClick={() => setSelectedLog(log)}
-                        className="text-primary hover:text-primary-foreground text-[11px] h-6"
+                        className="text-primary hover:text-primary hover:bg-primary/10 text-[11px] h-6"
                       >
                         <Code className="h-3 w-3 mr-1" /> Stacktrace
                       </Button>
@@ -234,13 +253,43 @@ export default function DeveloperPage() {
                     </div>
                   )}
 
-                  <p className="text-slate-200 leading-relaxed break-words">
+                  <p className="text-foreground/90 leading-relaxed break-words font-mono">
                     {log.message}
                   </p>
                 </div>
               ))
             )}
           </CardContent>
+
+          {/* Paginação do Console de Logs */}
+          <div className="flex items-center justify-between p-4 border-t border-border/40">
+            <div className="text-xs text-muted-foreground">
+              Página <strong className="text-foreground">{logsPage}</strong> de{" "}
+              <strong className="text-foreground">
+                {logsPagination.totalPages || 1}
+              </strong>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
+                disabled={logsPage === 1 || isLoading}
+                className="h-8 text-xs"
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLogsPage((p) => p + 1)}
+                disabled={logsPage >= logsPagination.totalPages || isLoading}
+                className="h-8 text-xs"
+              >
+                Próxima
+              </Button>
+            </div>
+          </div>
         </Card>
       </div>
 
@@ -257,7 +306,7 @@ export default function DeveloperPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-2 rounded-xl bg-slate-950 p-4 font-mono text-xs text-red-300 overflow-x-auto max-h-[350px] border border-slate-800">
+          <div className="mt-2 rounded-xl bg-muted/80 p-4 font-mono text-xs text-destructive overflow-x-auto max-h-[350px] border border-border">
             <pre>
               {selectedLog?.detail || "Nenhum detalhe adicional informado."}
             </pre>
