@@ -8,6 +8,7 @@ import {
   Code,
   Calendar,
   Building2,
+  Cpu,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -27,9 +36,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { PaginationControl } from "@/components/ui/pagination-control";
 import Header from "../../components/dashboard/Header";
 import { apiFetch } from "@/api/apiFetch";
-import { PaginationControl } from "@/components/ui/pagination-control";
 
 const logLevelStyles = {
   ERROR:
@@ -88,7 +97,6 @@ export default function DeveloperPage() {
     loadDevData();
   }, [logFilter, logsPage]);
 
-  // Ao mudar o filtro, volta para a página 1
   const handleFilterChange = (newLevel) => {
     setLogFilter(newLevel);
     setLogsPage(1);
@@ -129,7 +137,7 @@ export default function DeveloperPage() {
           <Card className="border-border/60 shadow-xs transition-all hover:border-primary/40">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Latência Média de Inferência
+                Latência Média Geral
               </CardTitle>
               <Clock className="h-4 w-4 text-primary" />
             </CardHeader>
@@ -138,7 +146,7 @@ export default function DeveloperPage() {
                 {metrics?.avg_latency_seconds ?? 0}s
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Tempo de resposta por execução do NexoEngine
+                Tempo de resposta médio global por inferência
               </p>
             </CardContent>
           </Card>
@@ -161,7 +169,83 @@ export default function DeveloperPage() {
           </Card>
         </div>
 
-        {/* Console / Visualizador de Logs do Sistema */}
+        {/* Tabela de Comparação de Tempo Médio por Modelo de IA */}
+        <Card className="border-border/60 shadow-xs">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-primary" />
+              Desempenho por Modelo de IA (Benchmark)
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Média de tempo de resposta e volume de requisições por modelo
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="py-2.5 font-semibold text-xs">
+                      Modelo de IA
+                    </TableHead>
+                    <TableHead className="py-2.5 font-semibold text-xs">
+                      Análises Processadas
+                    </TableHead>
+                    <TableHead className="py-2.5 font-semibold text-xs">
+                      Tempo Médio de Inferência
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-20 text-center">
+                        <Spinner className="h-4 w-4 text-primary inline mr-2" />
+                        <span className="text-xs text-muted-foreground">
+                          Carregando comparativo...
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : !metrics?.model_metrics ||
+                    metrics.model_metrics.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={3}
+                        className="h-16 text-center text-xs text-muted-foreground"
+                      >
+                        Nenhum dado de modelo registrado até o momento.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    metrics.model_metrics.map((model) => (
+                      <TableRow
+                        key={model.model_name}
+                        className="hover:bg-muted/30"
+                      >
+                        <TableCell className="py-2.5">
+                          <Badge
+                            variant="outline"
+                            className="font-mono text-xs bg-primary/5 border-primary/20"
+                          >
+                            {model.model_name}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-2.5 text-xs text-muted-foreground">
+                          {model.total_analyses} execuções
+                        </TableCell>
+                        <TableCell className="py-2.5 text-xs font-semibold text-foreground">
+                          {model.avg_latency_seconds}s
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Console de Logs com Indicação do Modelo Usado */}
         <Card className="border-border/60 shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-700">
           <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -246,11 +330,25 @@ export default function DeveloperPage() {
                     )}
                   </div>
 
-                  {(log.client || log.meeting_title) && (
-                    <div className="flex items-center gap-2 text-[11px] text-primary/90 bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20 w-fit">
-                      <Building2 className="h-3 w-3 shrink-0" />
-                      <span className="font-semibold">{log.client}</span>
-                      {log.meeting_title && <span>— {log.meeting_title}</span>}
+                  {/* Informações da Reunião e Modelo Utilizado */}
+                  {(log.client || log.meeting_title || log.model_used) && (
+                    <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                      {(log.client || log.meeting_title) && (
+                        <div className="flex items-center gap-2 text-primary/90 bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20 w-fit">
+                          <Building2 className="h-3 w-3 shrink-0" />
+                          <span className="font-semibold">{log.client}</span>
+                          {log.meeting_title && (
+                            <span>— {log.meeting_title}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {log.model_used && (
+                        <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded-md border border-purple-300 dark:border-purple-800/60 font-mono text-[10px]">
+                          <Cpu className="h-3 w-3 shrink-0" />
+                          <span>{log.model_used}</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -263,7 +361,7 @@ export default function DeveloperPage() {
           </CardContent>
 
           {/* Paginação do Console de Logs */}
-          <div className="px-4">
+          <div className="p-4 border-t border-border/40">
             <PaginationControl
               currentPage={logsPage}
               totalPages={logsPagination.totalPages}
