@@ -116,27 +116,51 @@ export default function NewAnalysis() {
     }
 
     async function checkStatus() {
-      const status = await apiFetch(`/meetings/${meetingId}/status`);
-      if (status && status.ok) {
+      try {
+        const status = await apiFetch(`/meetings/${meetingId}/status`);
+
+        // Se o backend responder com erro HTTP (ex: 500, 404, etc) ou se apiFetch retornar null
+        if (!status || !status.ok) {
+          setAnalysisState("failed");
+          return;
+        }
+
         const data = await status.json();
 
         if (data.status === "completed") {
-          for (let p = progress; p <= 100; p += 2) {
-            await new Promise((resolve) => setTimeout(resolve, 50));
-            setProgress(p);
-          }
-          setAnalysisState("completed");
+          // Animação final fluida do progresso atual até 100%
+          setProgress((prev) => {
+            let current = prev;
+            const interval = setInterval(() => {
+              current += 2;
+              if (current >= 100) {
+                setProgress(100);
+                clearInterval(interval);
+              } else {
+                setProgress(current);
+              }
+            }, 30);
+            return prev;
+          });
+
           await new Promise((resolve) => setTimeout(resolve, 800));
+          setAnalysisState("completed");
+          await new Promise((resolve) => setTimeout(resolve, 600));
           navigate(`/meetings/${meetingId}`);
         } else if (data.status === "failed") {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Reunião falhou no processamento do backend -> vai direto para o estado de erro
           setAnalysisState("failed");
         } else {
-          if (progress < 99) {
-            setProgress((prev) => prev + 1);
-          }
+          // Ainda em processamento: incrementa com trava RÍGIDA em 99%
+          setProgress((prev) => (prev < 99 ? prev + 1 : 99));
+
+          // Continua consultando o status
           setTimeout(checkStatus, 3000);
         }
+      } catch (error) {
+        console.error("Erro na conexão com o servidor:", error);
+        // Caso caia no catch por perda total de conexão/rede, vai para a tela de erro
+        setAnalysisState("failed");
       }
     }
     checkStatus();
