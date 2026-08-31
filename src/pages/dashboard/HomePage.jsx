@@ -4,13 +4,21 @@ import { KPICards } from "../../components/dashboard/KPICards";
 import { RecentMeetings } from "../../components/dashboard/RecentMeetings";
 import { SentimentChart } from "../../components/dashboard/SentimentChart";
 import { TalkListenChart } from "../../components/dashboard/TalkListenChart";
+import { getCurrentUserFromToken } from "../../utils/auth";
 
 export default function HomePage() {
+  const user = getCurrentUserFromToken();
+  const name = user?.name.split(" ")[0];
+
   return (
     <div className="flex flex-col">
       <Header
         title={"Dashboard"}
-        subtitle={"Bem-vindo de volta, João. Aqui está o que está acontecendo."}
+        subtitle={
+          "Bem-vindo(a) de volta, " +
+          name +
+          ". Aqui está o que está acontecendo."
+        }
       />
 
       <div className="flex-1 space-y-6 p-4 lg:p-6">

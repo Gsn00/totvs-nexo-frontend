@@ -18,8 +18,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import MobileSidebar from "./Mobile-Sidebar";
+import { getCurrentUserFromToken } from "../../utils/auth";
 
 export default function Header({ title, subtitle }) {
+  const user = getCurrentUserFromToken();
+
   return (
     <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60 lg:px-6">
       <div className="flex items-center gap-4">
@@ -74,7 +77,7 @@ export default function Header({ title, subtitle }) {
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
                 <AvatarFallback className="bg-primary/10 text-primary">
-                  JD
+                  {user?.name?.split(" ").map((name) => name[0])}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -82,9 +85,9 @@ export default function Header({ title, subtitle }) {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">João Silva</p>
+                <p className="text-sm font-medium leading-none">{user?.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  joao.silva@empresa.com
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
