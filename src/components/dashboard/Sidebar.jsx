@@ -103,21 +103,6 @@ export default function Sidebar() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link
-                to="/settings"
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              >
-                <Settings className="h-5 w-5 shrink-0" />
-                <span className="hidden lg:block">Configurações</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="lg:hidden">
-              Configurações
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <button
                 onClick={() => {
                   localStorage.removeItem("token");
