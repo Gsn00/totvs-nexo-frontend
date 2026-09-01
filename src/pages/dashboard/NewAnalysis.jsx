@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FileText, Upload, Sparkles, CheckCircle2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { FileText, Upload, Sparkles, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Header from "../../components/dashboard/Header";
 import { useNavigate } from "react-router";
 import { CalendarIcon, XCircle } from "lucide-react";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -54,13 +54,120 @@ export default function NewAnalysis() {
   const [clientName, setClientName] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
-  const [timeZone, setTimeZone] = useState(
-    Intl.DateTimeFormat().resolvedOptions().timeZone,
-  );
+  const [timeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [analysisState, setAnalysisState] = useState("idle");
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+
+  // Controle de arquivo e modo de entrada
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [inputMode, setInputMode] = useState("none"); // "text" | "file" | "none"
+
+  // Refs para manipular elementos do DOM
+  const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
+
   const navigate = useNavigate();
+
+  // Extrai o texto preservando as quebras de linha brutas (\n)
+  const extractRawTranscript = (content) => {
+    if (!content) return "";
+
+    const trimmed = content.trim();
+
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        const possibleKeys = [
+          "ANON_TRANSCRICAO",
+          "transcricao",
+          "transcript",
+          "text",
+          "content",
+          "TRANSCRICAO",
+        ];
+
+        for (const key of possibleKeys) {
+          if (parsed[key] && typeof parsed[key] === "string") {
+            // Escape reverso para preservar as quebras de linha no formato bruto
+            return parsed[key]
+              .replace(/\r\n/g, "\\n")
+              .replace(/\n/g, "\\n")
+              .replace(/\r/g, "\\r");
+          }
+        }
+      } catch (e) {
+        // Se falhar o parse JSON, usa o conteúdo bruto original
+      }
+    }
+
+    return content;
+  };
+
+  // Ajusta a altura da textarea até o limite max-h-450px
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        450,
+      )}px`;
+    }
+  };
+
+  // Digitado / colado pelo usuário diretamente na textarea
+  const handleTextChange = (e) => {
+    const rawVal = e.target.value;
+    const extracted = extractRawTranscript(rawVal);
+
+    setTranscript(extracted);
+    setInputMode(extracted.trim().length > 0 ? "text" : "none");
+
+    setTimeout(adjustTextareaHeight, 0);
+  };
+
+  // Seleção de arquivo (.txt, .json)
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    setInputMode("file");
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const fileContent = event.target.result;
+      const extracted = extractRawTranscript(fileContent);
+      setTranscript(extracted);
+
+      setTimeout(adjustTextareaHeight, 0);
+    };
+
+    reader.readAsText(file);
+  };
+
+  // Limpa o arquivo selecionado e reseta os inputs do DOM
+  const handleClearFile = (e) => {
+    e.stopPropagation(); // Impede de abrir a janela de arquivo ao clicar no fechar
+    setSelectedFile(null);
+    setTranscript("");
+    setInputMode("none");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+  };
+
+  // Dispara o clique no input oculto de arquivo
+  const triggerFileInput = () => {
+    if (inputMode !== "text" && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   const handleAnalyze = async () => {
     if (
@@ -99,13 +206,14 @@ export default function NewAnalysis() {
       meetingId = data.id;
     } else {
       setAnalysisState("failed");
+      return;
     }
 
     for (let i = 0; i < analysisSteps.length; i++) {
       setCurrentStep(i);
       const stepProgress = ((i + 1) / analysisSteps.length) * 100;
 
-      if (i != analysisSteps.length - 1) {
+      if (i !== analysisSteps.length - 1) {
         for (let p = progress; p <= stepProgress; p += 2) {
           await new Promise((resolve) => setTimeout(resolve, 50));
           setProgress(p);
@@ -119,7 +227,6 @@ export default function NewAnalysis() {
       try {
         const status = await apiFetch(`/meetings/${meetingId}/status`);
 
-        // Se o backend responder com erro HTTP (ex: 500, 404, etc) ou se apiFetch retornar null
         if (!status || !status.ok) {
           setAnalysisState("failed");
           return;
@@ -128,7 +235,6 @@ export default function NewAnalysis() {
         const data = await status.json();
 
         if (data.status === "completed") {
-          // Animação final fluida do progresso atual até 100%
           setProgress((prev) => {
             let current = prev;
             const interval = setInterval(() => {
@@ -148,30 +254,21 @@ export default function NewAnalysis() {
           await new Promise((resolve) => setTimeout(resolve, 600));
           navigate(`/meetings/${meetingId}`);
         } else if (data.status === "failed") {
-          // Reunião falhou no processamento do backend -> vai direto para o estado de erro
           setAnalysisState("failed");
         } else {
-          // Ainda em processamento: incrementa com trava RÍGIDA em 99%
           setProgress((prev) => (prev < 99 ? prev + 1 : 99));
-
-          // Continua consultando o status
           setTimeout(checkStatus, 3000);
         }
       } catch (error) {
         console.error("Erro na conexão com o servidor:", error);
-        // Caso caia no catch por perda total de conexão/rede, vai para a tela de erro
         setAnalysisState("failed");
       }
     }
     checkStatus();
   };
 
-  const handleFileUpload = (e) => {
-    // Simulate file reading
-  };
-
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header
         title="Nova Análise"
         subtitle="Analise uma transcrição de reunião com IA"
@@ -181,7 +278,7 @@ export default function NewAnalysis() {
         <div className="mx-auto max-w-3xl space-y-6">
           {analysisState === "idle" && (
             <>
-              {/* Meeting Details */}
+              {/* Detalhes da Reunião */}
               <Card>
                 <CardHeader>
                   <CardTitle>Detalhes da Reunião</CardTitle>
@@ -245,60 +342,93 @@ export default function NewAnalysis() {
                 </CardContent>
               </Card>
 
-              {/* Transcript Input */}
+              {/* Transcrição Input */}
               <Card>
                 <CardHeader>
                   <CardTitle>Transcrição</CardTitle>
                   <CardDescription>
-                    Cole sua transcrição de reunião ou envie um arquivo de texto
+                    Cole sua transcrição de reunião ou selecione um arquivo de
+                    texto/json
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* File Upload */}
-                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50 p-8 transition-colors hover:border-primary/50">
-                    <div className="text-center">
-                      <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
-                      <p className="mt-2 font-medium">
-                        Envie um arquivo de transcrição
+                  {/* Container de Upload Customizado (Sem botão nativo duplicado) */}
+                  <div
+                    onClick={triggerFileInput}
+                    className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-all duration-200 ${
+                      inputMode === "text"
+                        ? "opacity-40 cursor-not-allowed border-border bg-muted/20"
+                        : "border-border bg-muted/40 hover:border-primary/60 hover:bg-muted/70 cursor-pointer"
+                    }`}
+                  >
+                    {/* Input nativo OCULTO para eliminar o botão "Escolher arquivo" duplicado */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".txt,.json,.doc,.docx"
+                      onChange={handleFileUpload}
+                      disabled={inputMode === "text"}
+                      className="hidden"
+                    />
+
+                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+
+                    {selectedFile ? (
+                      <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-lg border border-primary/20 shadow-xs">
+                        <span className="font-semibold text-xs truncate max-w-[280px]">
+                          {selectedFile.name}
+                        </span>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          onClick={handleClearFile}
+                          className="h-5 w-5 text-muted-foreground hover:text-destructive hover:bg-transparent"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="font-medium text-sm text-foreground">
+                        {inputMode === "text"
+                          ? "Upload desabilitado (texto colado no campo abaixo)"
+                          : "Clique para selecionar um arquivo (.txt, .json)"}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        ou arraste e solte
-                      </p>
-                      <Input
-                        type="file"
-                        accept=".txt,.doc,.docx"
-                        onChange={handleFileUpload}
-                        className="mt-4 w-auto"
-                      />
-                    </div>
+                    )}
                   </div>
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
+                      <span className="w-full border-t border-border/60" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
+                      <span className="bg-card px-2 text-muted-foreground font-medium">
                         Ou cole diretamente
                       </span>
                     </div>
                   </div>
 
-                  {/* Text Area */}
+                  {/* Textarea com altura limite (max-h-[450px]) para não crescer infinitamente */}
                   <Textarea
-                    placeholder="Cole sua transcrição de reunião aqui...
-
-Exemplo:
-João (Vendas): Obrigado por participar da chamada de hoje...
-Maria (Cliente): Estamos avaliando várias soluções incluindo..."
+                    ref={textareaRef}
+                    placeholder={
+                      inputMode === "file"
+                        ? "Campo desabilitado porque um arquivo foi selecionado no topo."
+                        : "Cole sua transcrição de reunião aqui...\n\nExemplo:\nJoão (Vendas): Obrigado por participar da chamada de hoje...\nMaria (Cliente): Estamos avaliando várias soluções incluindo..."
+                    }
                     value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    className="min-h-75 font-mono text-sm"
+                    onChange={handleTextChange}
+                    disabled={inputMode === "file"}
+                    className={`min-h-[180px] max-h-[450px] overflow-y-auto font-mono text-sm leading-relaxed resize-none transition-all duration-200 ${
+                      inputMode === "file"
+                        ? "opacity-50 cursor-not-allowed bg-muted/30"
+                        : ""
+                    }`}
                   />
 
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
                     <span className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-3.5 w-3.5" />
                       {transcript.length > 0
                         ? `${transcript.split(/\s+/).filter(Boolean).length} palavras`
                         : "Sem conteúdo ainda"}
@@ -308,10 +438,10 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
                 </CardContent>
               </Card>
 
-              {/* Analyze Button */}
+              {/* Botão de Envio */}
               <Button
                 size="lg"
-                className="w-full gap-2"
+                className="w-full gap-2 shadow-sm font-semibold"
                 onClick={handleAnalyze}
                 disabled={
                   !transcript.trim() ||
@@ -326,7 +456,7 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
             </>
           )}
 
-          {/* Analysis in Progress */}
+          {/* Estado: Em Análise */}
           {analysisState === "analyzing" && (
             <Card>
               <CardHeader className="text-center">
@@ -397,7 +527,7 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
             </Card>
           )}
 
-          {/* Analysis Completed */}
+          {/* Estado: Concluído */}
           {analysisState === "completed" && (
             <Card>
               <CardHeader className="text-center">
@@ -419,7 +549,7 @@ Maria (Cliente): Estamos avaliando várias soluções incluindo..."
             </Card>
           )}
 
-          {/* Failed State */}
+          {/* Estado: Erro */}
           {analysisState === "failed" && (
             <Card>
               <CardHeader className="text-center">
