@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { apiFetch } from "@/api/apiFetch";
 
 const quickPrompts = [
   "Quais são os principais riscos desta conta?",
@@ -25,10 +26,13 @@ const initialMessages = [
   },
 ];
 
-export function MeetingChatbot() {
+export function MeetingChatbot({ meetingId }) {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState(
+    `session_${meetingId}_${Date.now()}`,
+  );
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -39,36 +43,48 @@ export function MeetingChatbot() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  function answerQuestion(question) {
-    const normalized = question.toLowerCase();
-    if (normalized.includes("risco")) {
-      return "Os principais riscos são a preocupação com a performance do módulo de relatórios e as menções a SAP e Senior como alternativas consideradas.";
-    }
-    if (normalized.includes("próxim") || normalized.includes("passo")) {
-      return "Os próximos passos recomendados são acompanhar a atualização de performance do Q1, agendar uma demonstração para Financeiro e RH e enviar a documentação aprimorada.";
-    }
-    if (normalized.includes("sentimento")) {
-      return "O sentimento geral foi positivo, com satisfação com a plataforma e a integração com o ERP, apesar da preocupação pontual com performance.";
-    }
-    return "Com base nesta reunião, o cliente demonstra boa satisfação e potencial de expansão. Também vale acompanhar a performance dos relatórios e os concorrentes mencionados.";
-  }
-
-  function handleSendQuestion(questionText) {
-    if (!questionText.trim() || isTyping) return;
+  async function handleSendQuestion(questionText) {
+    if (!questionText.trim() || isTyping || !meetingId) return;
 
     const userMsg = { role: "user", content: questionText.trim() };
     setMessages((current) => [...current, userMsg]);
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const botResponse = answerQuestion(questionText);
+    try {
+      // Prepara o FormData conforme exigido pelo backend FastAPI
+      const formData = new FormData();
+      formData.append("question", questionText.trim());
+      formData.append("session_id", sessionId);
+
+      const response = await apiFetch(`/meetings/${meetingId}/chat`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response || !response.ok) {
+        throw new Error("Erro ao consultar a API do chat");
+      }
+
+      const data = await response.json();
+
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: botResponse },
+        { role: "assistant", content: data.answer },
       ]);
+    } catch (error) {
+      console.error("Erro na comunicação com o chatbot:", error);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content:
+            "Desculpe, ocorreu um erro ao consultar as informações da reunião. Tente novamente em instantes.",
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 3000);
+    }
   }
 
   function submitMessage(event) {
@@ -78,11 +94,13 @@ export function MeetingChatbot() {
 
   function handleReset() {
     setMessages(initialMessages);
+    // Cria um novo session_id para limpar a memória conversacional no backend
+    setSessionId(`session_${meetingId}_${Date.now()}`);
   }
 
   return (
     <Card className="border-border/80 bg-gradient-to-b from-card to-card/50 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
-      {/* Header com destaque em degradê */}
+      {/* Header */}
       <CardHeader className="border-b border-border/50 bg-muted/20 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -125,6 +143,7 @@ export function MeetingChatbot() {
               size="sm"
               className="h-auto py-0.5 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-xs font-medium transition-all duration-200 whitespace-normal text-left shadow-xs"
               onClick={() => handleSendQuestion(prompt)}
+              disabled={isTyping}
             >
               <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary shrink-0" />
               {prompt}
@@ -132,7 +151,7 @@ export function MeetingChatbot() {
           ))}
         </div>
 
-        {/* Timeline / Area de Chat */}
+        {/* Timeline / Área de Chat */}
         <div className="relative flex h-[380px] flex-col gap-4 overflow-y-auto rounded-2xl border border-border/40 bg-background/50 p-4 shadow-inner">
           {messages.map((message, index) => (
             <div
@@ -156,7 +175,7 @@ export function MeetingChatbot() {
               </div>
 
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
                   message.role === "user"
                     ? "bg-primary text-primary-foreground rounded-tr-xs"
                     : "bg-card border border-border/60 text-card-foreground rounded-tl-xs"
@@ -182,6 +201,7 @@ export function MeetingChatbot() {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Form de Envio */}
         <form onSubmit={submitMessage} className="flex items-center gap-2 pt-1">
           <Input
             value={input}
@@ -189,6 +209,7 @@ export function MeetingChatbot() {
             placeholder="Pergunte qualquer detalhe sobre a reunião..."
             aria-label="Pergunte sobre esta reunião"
             className="h-11 rounded-xl border-border/80 bg-background/80 focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+            disabled={isTyping}
           />
           <Button
             type="submit"

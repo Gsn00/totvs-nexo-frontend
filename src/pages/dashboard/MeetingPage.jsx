@@ -511,7 +511,7 @@ export default function MeetingDetailsPage() {
 
           {/* Aba de ChatBot */}
           <TabsContent value="chatbot">
-            <MeetingChatbot />
+            <MeetingChatbot meetingId={meeting.meeting.id} />
           </TabsContent>
         </Tabs>
       </div>
