@@ -190,7 +190,8 @@ export default function MeetingDetailsPage() {
                     {meeting.analysis.health_score}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Baseado em engajamento e tom
+                    Baseado na satisfação do cliente, engajamento e pontos de
+                    risco identificados
                   </p>
                 </div>
                 <div className="w-24 flex flex-col gap-2">
